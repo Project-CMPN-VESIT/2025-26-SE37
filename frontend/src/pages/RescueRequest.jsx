@@ -2,140 +2,139 @@ import React from "react";
 
 const RescueRequest = () => {
   return (
-    <div className="bg-gray-50 min-h-screen py-12 px-4">
+    <div className="pt-24 pb-12 px-4 font-sans transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
-        
-        {/* Page Header */}
         <div className="text-center mb-10">
           <div className="inline-block bg-red-100 text-ngo-red px-4 py-1 rounded-full text-sm font-bold tracking-wider mb-4 animate-pulse">
             🚨 EMERGENCY RESPONSE
           </div>
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-ngo-dark mb-4">
+          <h1 className="text-4xl md:text-5xl font-heading font-bold text-ngo-dark dark:text-white mb-4">
             Request a Rescue
           </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-            Agar aapko sadak par koi beghar, bimar ya mentally challenged insaan dikhe jise turant madad ki zaroorat hai, toh ye form bharein.
+          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto text-lg">
+            Agar aapko sadak par koi beghar, bimar ya mentally challenged insaan
+            dikhe jise turant madad ki zaroorat hai, toh ye form bharein.
           </p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          
-          {/* Left Side - Emergency Info & Guidelines */}
           <div className="lg:w-1/3 space-y-6">
-            {/* Direct Call Box */}
             <div className="bg-ngo-red text-white p-8 rounded-2xl shadow-lg text-center">
-              <h2 className="text-2xl font-bold mb-2">Need Urgent Help?</h2>
-              <p className="text-red-100 mb-6">Form bharne ka time nahi hai? Direct call karein:</p>
+              <h2 className="text-2xl font-bold font-heading mb-2">
+                Need Urgent Help?
+              </h2>
+              <p className="text-red-100 mb-6">
+                Form bharne ka time nahi hai? Direct call karein:
+              </p>
+              {/* 🔥 Box text color adjusted for red contrast */}
               <div className="bg-white text-ngo-red text-3xl font-mono font-bold py-4 rounded-xl shadow-inner">
                 +91 98765 43210
               </div>
-              <p className="mt-4 text-sm font-medium">Available 24/7 in Navi Mumbai/Kalyan</p>
+              <p className="mt-4 text-sm font-medium">
+                Available 24/7 in Navi Mumbai/Kalyan
+              </p>
             </div>
 
-            {/* Guidelines */}
-            <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
-              <h3 className="font-bold text-ngo-dark text-lg mb-4 flex items-center gap-2">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+              <h3 className="font-bold font-heading text-ngo-dark dark:text-white text-lg mb-4 flex items-center gap-2">
                 📋 Rescue Guidelines
               </h3>
-              <ul className="space-y-3 text-sm text-gray-600">
+              <ul className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
                 <li className="flex items-start gap-2">
-                  <span className="text-ngo-green">✓</span>
-                  Kripya exact location aur landmark batayein.
+                  <span className="text-ngo-green">✓</span> Kripya exact
+                  location aur landmark batayein.
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-ngo-green">✓</span>
-                  Agar possible ho, toh team aane tak us insaan ke paas hi rahein.
+                  <span className="text-ngo-green">✓</span> Agar possible ho,
+                  toh team aane tak us insaan ke paas hi rahein.
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-ngo-green">✓</span>
-                  Dur se ek photo zaroor kheenchiye aur upload karein, isse team ko dhundne mein aasaani hoti hai.
+                  <span className="text-ngo-green">✓</span> Dur se ek photo
+                  zaroor kheenchiye aur upload karein.
                 </li>
-                <li className="flex items-start gap-2 text-ngo-red font-semibold">
-                  <span>⚠️</span>
-                  Fake requests na dalein, ye kisi ki jaan ka sawal ho sakta hai.
+                <li className="flex items-start gap-2 text-red-500 font-semibold">
+                  <span>⚠️</span> Fake requests na dalein, ye kisi ki jaan ka
+                  sawal ho sakta hai.
                 </li>
               </ul>
             </div>
           </div>
 
-          {/* Right Side - Rescue Form */}
-          <div className="lg:w-2/3 bg-white p-8 md:p-10 rounded-2xl shadow-xl border-t-4 border-ngo-red">
-            <h2 className="text-2xl font-heading font-bold text-ngo-dark mb-6">Rescue Details Form</h2>
-            
-            <form className="space-y-6">
-              
-              {/* Location */}
+          <div className="lg:w-2/3 bg-white dark:bg-gray-800 p-8 md:p-10 rounded-2xl shadow-xl border-t-4 border-ngo-red transition-colors duration-300">
+            <h2 className="text-2xl font-heading font-bold text-ngo-dark dark:text-white mb-6">
+              Rescue Details Form
+            </h2>
+
+            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Exact Location / Landmark <span className="text-ngo-red">*</span>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                  Exact Location / Landmark{" "}
+                  <span className="text-ngo-red">*</span>
                 </label>
-                <input 
-                  type="text" 
+                <input
                   required
-                  className="w-full p-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ngo-red focus:border-ngo-red outline-none transition" 
-                  placeholder="E.g., Outside Kalyan Station Platform 1 ticket counter" 
+                  type="text"
+                  className="w-full p-4 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-ngo-red focus:border-ngo-red outline-none transition-colors"
+                  placeholder="E.g., Outside Kalyan Station Platform 1 ticket counter"
                 />
               </div>
 
-              {/* Person Description */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Description of the Person's Condition <span className="text-ngo-red">*</span>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                  Description of the Person's Condition{" "}
+                  <span className="text-ngo-red">*</span>
                 </label>
-                <textarea 
+                <textarea
                   required
                   rows="3"
-                  className="w-full p-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ngo-red focus:border-ngo-red outline-none transition resize-none" 
-                  placeholder="Kapde kaise pehne hain? Chot lagi hai kya? Age kitni lag rahi hai?" 
+                  className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-ngo-green transition-colors resize-none"
+                  placeholder="Kapde kaise pehne hain? Chot lagi hai kya? Age kitni lag rahi hai?"
                 ></textarea>
               </div>
 
-              {/* Photo Upload */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                   Upload Photo (Optional but Highly Recommended)
                 </label>
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   accept="image/*"
-                  className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-ngo-red hover:file:bg-red-100 transition" 
+                  className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 dark:file:bg-gray-600 file:text-ngo-red dark:file:text-red-400 hover:file:bg-red-100 transition-colors"
                 />
               </div>
 
-              {/* Reporter Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-100 dark:border-gray-700">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Your Name</label>
-                  <input 
-                    type="text" 
-                    className="w-full p-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ngo-red focus:border-ngo-red outline-none transition" 
-                    placeholder="Enter your name" 
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-ngo-red focus:border-ngo-red outline-none transition-colors"
+                    placeholder="Enter your name"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                     Your Phone Number <span className="text-ngo-red">*</span>
                   </label>
-                  <input 
-                    type="tel" 
+                  <input
                     required
-                    className="w-full p-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ngo-red focus:border-ngo-red outline-none transition" 
-                    placeholder="So we can contact you" 
+                    type="tel"
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-ngo-red focus:border-ngo-red outline-none transition-colors"
+                    placeholder="So we can contact you"
                   />
                 </div>
               </div>
 
-              {/* Submit Button */}
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="w-full bg-ngo-red text-white font-bold text-lg py-4 rounded-lg hover:bg-red-700 transition-colors duration-300 shadow-lg mt-4 flex justify-center items-center gap-2"
               >
                 <span>🚨</span> Send Rescue Alert
               </button>
-              
             </form>
           </div>
-
         </div>
       </div>
     </div>
