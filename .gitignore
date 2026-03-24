@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Environment Variables (Security)
+.env
+backend/.env
+frontend/.env
+
+# Uploaded Files
+backend/uploads/
+uploads/
+
+# Production Builds
+frontend/build/
+frontend/dist/
+
+# OS Files
+.DS_Store

@@ -1,5 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
+// Professional Icons Import
+import { 
+  LayoutDashboard, 
+  UserPlus, 
+  Database, 
+  HeartHandshake, 
+  Users, 
+  AlertCircle,
+  CalendarDays,
+  UserSearch,
+  Mail
+} from "lucide-react";
+import { CiLight, CiDark } from "react-icons/ci";
+
+// Importing our modular components
 import DashboardOverview from "../components/admin/DashboardOverview";
 import AddPerson from "../components/admin/AddPerson";
 import Records from "../components/admin/Records";
@@ -16,13 +32,15 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
+  // Persistent Theme Logic
   useEffect(() => {
     if (theme === "dark") {
       document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
-    localStorage.setItem("theme", theme);
   }, [theme]);
 
   const toggleTheme = () => {
@@ -34,16 +52,17 @@ const AdminDashboard = () => {
     setIsSidebarOpen(false);
   };
 
+  // Full Feature List with Premium Icons
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: "📊" },
-    { id: "add", label: "Add Person", icon: "➕" },
-    { id: "records", label: "View Records", icon: "📁" },
-    { id: "events", label: "Manage Events", icon: "🗓️" },
-    { id: "donations", label: "Donations", icon: "💰" },
-    { id: "volunteers", label: "Volunteers", icon: "🤝" },
-    { id: "rescues", label: "Rescue Alerts", icon: "🚨" },
-    { id: "missing-reports", label: "Missing Claims", icon: "🕵️" },
-    { id: "contacts", label: "Inbox", icon: "✉️" },
+    { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
+    { id: "add", label: "Add Person", icon: <UserPlus size={20} /> },
+    { id: "records", label: "View Records", icon: <Database size={20} /> },
+    { id: "events", label: "Manage Events", icon: <CalendarDays size={20} /> },
+    { id: "donations", label: "Donations", icon: <HeartHandshake size={20} /> },
+    { id: "volunteers", label: "Volunteers", icon: <Users size={20} /> },
+    { id: "rescues", label: "Rescue Alerts", icon: <AlertCircle size={20} /> },
+    { id: "missing-reports", label: "Missing Claims", icon: <UserSearch size={20} /> },
+    { id: "contacts", label: "Inbox", icon: <Mail size={20} /> },
   ];
 
   const handleLogout = () => {
@@ -66,64 +85,80 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 font-sans overflow-hidden">
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 font-sans overflow-hidden">
+      {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsSidebarOpen(false)}></div>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden" onClick={() => setIsSidebarOpen(false)}></div>
       )}
 
-      <div className={`fixed md:relative z-50 w-64 h-full bg-white dark:bg-gray-800 shadow-2xl md:shadow-lg flex flex-col border-r border-transparent dark:border-gray-700 transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
-        <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+      {/* Sidebar Section */}
+      <aside className={`fixed md:relative z-50 w-64 h-full bg-white dark:bg-slate-900 shadow-2xl md:shadow-none flex flex-col border-r border-slate-200 dark:border-slate-800 transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-heading">Maa Astha</h2>
-            <p className="text-xs text-green-600 dark:text-green-400 mt-1 font-semibold tracking-wide">ADMIN PORTAL</p>
+            <h2 className="text-xl font-bold text-indigo-600 dark:text-indigo-400">Maa Astha</h2>
+            <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">Admin Portal</p>
           </div>
-          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-500 hover:text-red-500 focus:outline-none">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-slate-400 hover:text-red-500">
+             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
           {menuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => handleTabChange(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 activeTab === item.id
-                  ? "bg-green-50 dark:bg-gray-700 text-green-600 dark:text-green-400 font-medium"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-semibold shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
               }`}
             >
-              <span>{item.icon}</span>
-              {item.label}
+              <span className={activeTab === item.id ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400"}>
+                {item.icon}
+              </span>
+              <span className="text-sm">{item.label}</span>
             </button>
           ))}
         </nav>
-      </div>
+      </aside>
 
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden w-full">
-        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 p-4 flex justify-between items-center">
+        <header className="bg-white dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-800 p-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <button className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md focus:outline-none" onClick={() => setIsSidebarOpen(true)}>
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            <button className="md:hidden p-2 text-slate-500" onClick={() => setIsSidebarOpen(true)}>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
             </button>
-            <h2 className="font-semibold text-gray-700 dark:text-white capitalize font-heading text-xl">
+            <h2 className="font-bold text-slate-700 dark:text-slate-200 capitalize text-lg tracking-tight">
               {activeTab.replace("-", " ")}
             </h2>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            <button onClick={toggleTheme} className="p-2 rounded-full text-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none" title="Toggle Theme">
-              {theme === "light" ? "🌙" : "☀️"}
+          <div className="flex items-center gap-4">
+            {/* Theme Toggle with CiLight & CiDark */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:ring-2 ring-indigo-200 dark:ring-slate-700 transition-all"
+              title="Toggle Theme"
+            >
+              {theme === "light" ? <CiDark size={24} /> : <CiLight size={24} className="text-yellow-400" />}
             </button>
-            <button onClick={handleLogout} className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors font-medium shadow-sm border border-red-100 dark:border-red-900/50 text-sm sm:text-base">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-lg hover:bg-rose-600 hover:text-white transition-all font-semibold text-sm border border-rose-100 dark:border-rose-900/50"
+            >
               <span className="hidden sm:inline">Logout</span>
+              <LayoutDashboard size={16} className="rotate-180" /> 
             </button>
           </div>
         </header>
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
-          {renderContent()}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 dark:bg-slate-950 p-6">
+          <div className="max-w-7xl mx-auto">
+            {renderContent()}
+          </div>
         </main>
       </div>
     </div>

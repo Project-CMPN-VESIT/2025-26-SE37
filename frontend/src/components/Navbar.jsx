@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { CiLight, CiDark } from "react-icons/ci"; // <-- Premium Icons Import
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -68,11 +69,13 @@ const Navbar = () => {
             </div>
 
             <div className="flex items-center space-x-4 border-l pl-4 xl:pl-6 border-gray-200 dark:border-gray-700">
+              {/* Premium Theme Toggle Desktop */}
               <button
                 onClick={toggleTheme}
-                className="text-xl p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0"
+                className="p-2 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:ring-2 ring-green-200 dark:ring-gray-700 transition-all flex-shrink-0"
+                title="Toggle Theme"
               >
-                {theme === "light" ? "🌙" : "☀️"}
+                {theme === "light" ? <CiDark size={24} /> : <CiLight size={24} className="text-yellow-400" />}
               </button>
 
               <Link
@@ -91,11 +94,13 @@ const Navbar = () => {
           </div>
 
           <div className="lg:hidden flex items-center gap-4">
+            {/* Premium Theme Toggle Mobile */}
             <button
               onClick={toggleTheme}
-              className="text-xl p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="p-2 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:ring-2 ring-green-200 dark:ring-gray-700 transition-all"
+              title="Toggle Theme"
             >
-              {theme === "light" ? "🌙" : "☀️"}
+              {theme === "light" ? <CiDark size={24} /> : <CiLight size={24} className="text-yellow-400" />}
             </button>
 
             <button
