@@ -26,7 +26,10 @@ const DashboardOverview = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/persons/stats");
+        const token = localStorage.getItem("adminToken"); // 🔐 KEY ADDED
+        const response = await fetch("http://localhost:5000/api/persons/stats", {
+          headers: { "Authorization": `Bearer ${token}` } // 🔐 HEADER ADDED
+        });
         const data = await response.json();
         if (data.success) {
           setStats(data.data);
@@ -44,10 +47,10 @@ const DashboardOverview = () => {
   return (
     <div className="space-y-6 transition-colors duration-300">
       <div>
-        <h1 className="text-2xl font-bold text-ngo-dark dark:text-white font-heading transition-colors duration-300">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-heading transition-colors duration-300">
           Shelter Overview
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 font-sans transition-colors duration-300">
+        <p className="text-slate-500 dark:text-slate-400 font-sans transition-colors duration-300 mt-1">
           Current status and recent activities at Maa Astha.
         </p>
       </div>
@@ -57,25 +60,25 @@ const DashboardOverview = () => {
           title="Total Sheltered"
           value={isLoading ? "..." : stats.totalSheltered}
           subtitle="Currently in shelter"
-          colorClass="text-ngo-green dark:text-green-400"
+          colorClass="text-emerald-600 dark:text-emerald-400"
         />
         <StatCard
           title="Recently Added"
           value={isLoading ? "..." : stats.recentlyAdded}
           subtitle="Last 7 days"
-          colorClass="text-ngo-light dark:text-green-300"
+          colorClass="text-indigo-600 dark:text-indigo-400"
         />
         <StatCard
           title="Reunited"
           value={isLoading ? "..." : stats.reunited}
           subtitle="With family"
-          colorClass="text-ngo-dark dark:text-white"
+          colorClass="text-slate-800 dark:text-white"
         />
         <StatCard
           title="Medical Needs"
           value={isLoading ? "..." : stats.medicalNeeds}
           subtitle="Requires attention"
-          colorClass="text-ngo-red dark:text-red-400"
+          colorClass="text-rose-600 dark:text-rose-400"
         />
       </div>
     </div>

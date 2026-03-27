@@ -19,10 +19,15 @@ const Records = () => {
   });
   const [isUpdating, setIsUpdating] = useState(false);
 
+  const adminRole = localStorage.getItem("adminRole");
+
   const fetchRecords = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/persons/all");
+      const token = localStorage.getItem("adminToken");
+      const response = await fetch("http://localhost:5000/api/persons/all", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await response.json();
       if (data.success) setRecords(data.data);
     } catch (error) {
@@ -48,16 +53,20 @@ const Records = () => {
     e.preventDefault();
     setIsUpdating(true);
     try {
+      const token = localStorage.getItem("adminToken");
       const response = await fetch(
         `http://localhost:5000/api/persons/update/${reunionModal._id}`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({
             status: "Reunited",
             reunionDetails: reunionForm,
           }),
-        }
+        },
       );
       if (response.ok) {
         alert("Reunion details logged securely!");
@@ -82,14 +91,24 @@ const Records = () => {
   const handleDelete = async (id) => {
     if (
       window.confirm(
-        "Bhai, pakka delete karna hai? Data hamesha ke liye chala jayega."
+        "Bhai, pakka delete karna hai? Data hamesha ke liye chala jayega.",
       )
     ) {
       try {
-        await fetch(`http://localhost:5000/api/persons/delete/${id}`, {
-          method: "DELETE",
-        });
-        fetchRecords();
+        const token = localStorage.getItem("adminToken");
+        const res = await fetch(
+          `http://localhost:5000/api/persons/delete/${id}`,
+          {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        const data = await res.json();
+        if (res.ok) {
+          fetchRecords();
+        } else {
+          alert(data.message || "Delete failed!");
+        }
       } catch (error) {
         alert("Delete failed!");
       }
@@ -139,7 +158,10 @@ const Records = () => {
               onClick={fetchRecords}
               className="p-2.5 text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-all active:scale-95"
             >
-              <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
+              <RefreshCw
+                size={16}
+                className={isLoading ? "animate-spin" : ""}
+              />
             </button>
           </div>
         </div>
@@ -191,15 +213,28 @@ const Records = () => {
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
             {isLoading && records.length === 0 ? (
               <tr>
-                <td colSpan="4" className="p-10 text-center text-slate-500 dark:text-slate-400">Loading database...</td>
+                <td
+                  colSpan="4"
+                  className="p-10 text-center text-slate-500 dark:text-slate-400"
+                >
+                  Loading database...
+                </td>
               </tr>
             ) : filteredRecords.length === 0 ? (
               <tr>
-                <td colSpan="4" className="p-10 text-center text-slate-500 dark:text-slate-400">No records found.</td>
+                <td
+                  colSpan="4"
+                  className="p-10 text-center text-slate-500 dark:text-slate-400"
+                >
+                  No records found.
+                </td>
               </tr>
             ) : (
               filteredRecords.map((record) => (
-                <tr key={record._id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                <tr
+                  key={record._id}
+                  className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
+                >
                   <td className="p-4">
                     <div className="font-medium text-slate-800 dark:text-slate-200">
                       {record.fullName || record.name}
@@ -209,7 +244,8 @@ const Records = () => {
                     </div>
                   </td>
                   <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide ${
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide ${
                         record.status === "Reunited"
                           ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20"
                           : "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20"
@@ -219,7 +255,11 @@ const Records = () => {
                     </span>
                   </td>
                   <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">
-                    {record.arrivalDateTime ? new Date(record.arrivalDateTime).toLocaleDateString("en-IN") : "N/A"}
+                    {record.arrivalDateTime
+                      ? new Date(record.arrivalDateTime).toLocaleDateString(
+                          "en-IN",
+                        )
+                      : "N/A"}
                   </td>
                   <td className="p-4 flex justify-center gap-2">
                     <button
@@ -236,12 +276,14 @@ const Records = () => {
                         <Handshake size={14} strokeWidth={2.5} /> Reunite
                       </button>
                     )}
-                    <button
-                      onClick={() => handleDelete(record._id)}
-                      className="flex items-center gap-1.5 text-xs font-bold uppercase px-3 py-1.5 rounded-lg transition-all shadow-sm bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-600 hover:text-white dark:bg-rose-900/40 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-600 dark:hover:text-white dark:hover:border-transparent"
-                    >
-                      <Trash2 size={14} strokeWidth={2.5} /> Delete
-                    </button>
+                    {adminRole === "superadmin" && (
+                      <button
+                        onClick={() => handleDelete(record._id)}
+                        className="flex items-center gap-1.5 text-xs font-bold uppercase px-3 py-1.5 rounded-lg transition-all shadow-sm bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-600 hover:text-white dark:bg-rose-900/40 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-600 dark:hover:text-white dark:hover:border-transparent"
+                      >
+                        <Trash2 size={14} strokeWidth={2.5} /> Delete
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))
@@ -257,37 +299,124 @@ const Records = () => {
               <h3 className="text-xl font-bold font-heading text-emerald-700 dark:text-emerald-400">
                 Reunion Security Form
               </h3>
-              <button onClick={() => setReunionModal(null)} className="text-slate-500 hover:text-rose-500 text-2xl leading-none">&times;</button>
+              <button
+                onClick={() => setReunionModal(null)}
+                className="text-slate-500 hover:text-rose-500 text-2xl leading-none"
+              >
+                &times;
+              </button>
             </div>
-             <form onSubmit={handleReunionSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleReunionSubmit} className="p-6 space-y-4">
               <div className="bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400 p-3 rounded-lg text-sm border border-yellow-200 dark:border-yellow-700/50 mb-4">
-                <strong>Attention:</strong> Log receiver details carefully. This is a crucial legal & security requirement.
+                <strong>Attention:</strong> Log receiver details carefully. This
+                is a crucial legal & security requirement.
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Date of Leaving *</label>
-                  <input required type="datetime-local" className="w-full p-2.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-white outline-none" value={reunionForm.dateOfLeaving} onChange={(e) => setReunionForm({...reunionForm, dateOfLeaving: e.target.value})} />
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                    Date of Leaving *
+                  </label>
+                  <input
+                    required
+                    type="datetime-local"
+                    className="w-full p-2.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-white outline-none"
+                    value={reunionForm.dateOfLeaving}
+                    onChange={(e) =>
+                      setReunionForm({
+                        ...reunionForm,
+                        dateOfLeaving: e.target.value,
+                      })
+                    }
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Receiver Name *</label>
-                  <input required type="text" placeholder="Who is taking them?" className="w-full p-2.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-white outline-none" value={reunionForm.receiverName} onChange={(e) => setReunionForm({...reunionForm, receiverName: e.target.value})} />
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                    Receiver Name *
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="Who is taking them?"
+                    className="w-full p-2.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-white outline-none"
+                    value={reunionForm.receiverName}
+                    onChange={(e) =>
+                      setReunionForm({
+                        ...reunionForm,
+                        receiverName: e.target.value,
+                      })
+                    }
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Relationship *</label>
-                  <input required type="text" placeholder="e.g., Brother, Son, NGO" className="w-full p-2.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-white outline-none" value={reunionForm.receiverRelation} onChange={(e) => setReunionForm({...reunionForm, receiverRelation: e.target.value})} />
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                    Relationship *
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="e.g., Brother, Son, NGO"
+                    className="w-full p-2.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-white outline-none"
+                    value={reunionForm.receiverRelation}
+                    onChange={(e) =>
+                      setReunionForm({
+                        ...reunionForm,
+                        receiverRelation: e.target.value,
+                      })
+                    }
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Receiver Contact No. *</label>
-                  <input required type="text" placeholder="Active mobile number" className="w-full p-2.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-white outline-none" value={reunionForm.receiverContact} onChange={(e) => setReunionForm({...reunionForm, receiverContact: e.target.value})} />
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                    Receiver Contact No. *
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="Active mobile number"
+                    className="w-full p-2.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-white outline-none"
+                    value={reunionForm.receiverContact}
+                    onChange={(e) =>
+                      setReunionForm({
+                        ...reunionForm,
+                        receiverContact: e.target.value,
+                      })
+                    }
+                  />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Receiver Permanent Address *</label>
-                  <textarea required rows="2" placeholder="Full residential address" className="w-full p-2.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-white outline-none resize-none" value={reunionForm.receiverAddress} onChange={(e) => setReunionForm({...reunionForm, receiverAddress: e.target.value})}></textarea>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                    Receiver Permanent Address *
+                  </label>
+                  <textarea
+                    required
+                    rows="2"
+                    placeholder="Full residential address"
+                    className="w-full p-2.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-white outline-none resize-none"
+                    value={reunionForm.receiverAddress}
+                    onChange={(e) =>
+                      setReunionForm({
+                        ...reunionForm,
+                        receiverAddress: e.target.value,
+                      })
+                    }
+                  ></textarea>
                 </div>
               </div>
               <div className="flex justify-end gap-3 mt-4">
-                <button type="button" onClick={() => setReunionModal(null)} className="px-5 py-2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg font-medium">Cancel</button>
-                <button type="submit" disabled={isUpdating} className="px-5 py-2 bg-emerald-600 text-white rounded-lg font-bold shadow-md disabled:opacity-50">{isUpdating ? "Logging..." : "Confirm Reunion"}</button>
+                <button
+                  type="button"
+                  onClick={() => setReunionModal(null)}
+                  className="px-5 py-2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="px-5 py-2 bg-emerald-600 text-white rounded-lg font-bold shadow-md disabled:opacity-50"
+                >
+                  {isUpdating ? "Logging..." : "Confirm Reunion"}
+                </button>
               </div>
             </form>
           </div>
@@ -298,69 +427,192 @@ const Records = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800">
             <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/80">
-              <h3 className="text-xl font-bold font-heading text-indigo-600 dark:text-indigo-400">Record Details</h3>
-              <button onClick={() => setSelectedPerson(null)} className="text-slate-500 hover:text-rose-500 text-2xl leading-none">&times;</button>
+              <h3 className="text-xl font-bold font-heading text-indigo-600 dark:text-indigo-400">
+                Record Details
+              </h3>
+              <button
+                onClick={() => setSelectedPerson(null)}
+                className="text-slate-500 hover:text-rose-500 text-2xl leading-none"
+              >
+                &times;
+              </button>
             </div>
             <div className="p-6 overflow-y-auto">
-               <div className="flex flex-col md:flex-row gap-8">
-                  <div className="w-full md:w-1/3 flex flex-col items-center gap-4">
-                     <div className="w-48 h-48 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center">
-                        {selectedPerson.imageUrl || selectedPerson.image ? (
-                           <img 
-                             src={(selectedPerson.imageUrl || selectedPerson.image).startsWith("http") ? (selectedPerson.imageUrl || selectedPerson.image) : `http://localhost:5000${selectedPerson.imageUrl || selectedPerson.image}`} 
-                             alt="Profile" 
-                             className="w-full h-full object-cover" 
-                             onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "block"; }}
-                           />
-                        ) : null}
-                        <span className="text-slate-400 text-sm px-4 text-center block" style={{ display: selectedPerson.imageUrl || selectedPerson.image ? "none" : "block" }}>No Photo</span>
-                     </div>
-                     <div className="text-center w-full">
-                        <span className={`px-4 py-1.5 block rounded-md text-sm font-bold tracking-wide mb-2 ${selectedPerson.status === "Reunited" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400" : "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400"}`}>Status: {selectedPerson.status}</span>
-                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full block">Days in Shelter: {calculateDays(selectedPerson.arrivalDateTime, selectedPerson.reunionDetails?.dateOfLeaving)}</span>
-                     </div>
+              <div className="flex flex-col md:flex-row gap-8">
+                <div className="w-full md:w-1/3 flex flex-col items-center gap-4">
+                  <div className="w-48 h-48 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center">
+                    {selectedPerson.imageUrl || selectedPerson.image ? (
+                      <img
+                        src={
+                          (
+                            selectedPerson.imageUrl || selectedPerson.image
+                          ).startsWith("http")
+                            ? selectedPerson.imageUrl || selectedPerson.image
+                            : `http://localhost:5000${selectedPerson.imageUrl || selectedPerson.image}`
+                        }
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                          e.target.nextSibling.style.display = "block";
+                        }}
+                      />
+                    ) : null}
+                    <span
+                      className="text-slate-400 text-sm px-4 text-center block"
+                      style={{
+                        display:
+                          selectedPerson.imageUrl || selectedPerson.image
+                            ? "none"
+                            : "block",
+                      }}
+                    >
+                      No Photo
+                    </span>
                   </div>
-                  <div className="w-full md:w-2/3 space-y-6">
-                     <div>
-                        <h4 className="text-xs font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-2 mb-3">Personal Information</h4>
-                        <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
-                           <div><p className="text-slate-500">Full Name</p><p className="font-semibold text-slate-900 dark:text-white">{selectedPerson.fullName || selectedPerson.name || "N/A"}</p></div>
-                           <div><p className="text-slate-500">Age & Gender</p><p className="font-semibold text-slate-900 dark:text-white">{selectedPerson.age || "N/A"} • {selectedPerson.gender || "N/A"}</p></div>
-                           <div className="col-span-2"><p className="text-slate-500">Location Found</p><p className="font-semibold text-slate-900 dark:text-white">{selectedPerson.address || selectedPerson.location || "N/A"}</p></div>
-                        </div>
-                     </div>
-                     <div>
-                        <h4 className="text-xs font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-2 mb-3">Admission Details</h4>
-                        <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
-                           <div><p className="text-slate-500">Brought By</p><p className="font-semibold text-slate-900 dark:text-white">{selectedPerson.broughtBy || "N/A"}</p></div>
-                           <div>
-                             <p className="text-slate-500">Arrival Date</p>
-                             <p className="font-semibold text-slate-900 dark:text-white">
-                               {selectedPerson.arrivalDateTime ? new Date(selectedPerson.arrivalDateTime).toLocaleString() : "N/A"}
-                             </p>
-                           </div>
-                           <div className="col-span-2"><p className="text-slate-500">Reason</p><p className="font-semibold text-slate-900 dark:text-white">{selectedPerson.reason || "N/A"}</p></div>
-                           <div className="col-span-2"><p className="text-slate-500">Condition / Description</p><p className="font-semibold text-slate-900 dark:text-white">{selectedPerson.condition || selectedPerson.description || "N/A"}</p></div>
-                        </div>
-                     </div>
-                     {selectedPerson.status === "Reunited" && selectedPerson.reunionDetails && (
-                       <div className="bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-800/30">
-                         <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-wider border-b border-emerald-200 dark:border-emerald-800 pb-2 mb-3">🤝 Reunion Details (Security Log)</h4>
-                         <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
-                           <div><p className="text-slate-500">Date of Leaving</p><p className="font-semibold text-slate-900 dark:text-white">{new Date(selectedPerson.reunionDetails.dateOfLeaving).toLocaleString()}</p></div>
-                           <div><p className="text-slate-500">Receiver Name</p><p className="font-semibold text-slate-900 dark:text-white">{selectedPerson.reunionDetails.receiverName}</p></div>
-                           <div><p className="text-slate-500">Relationship</p><p className="font-semibold text-slate-900 dark:text-white">{selectedPerson.reunionDetails.receiverRelation}</p></div>
-                           <div><p className="text-slate-500">Contact No.</p><p className="font-semibold text-slate-900 dark:text-white">{selectedPerson.reunionDetails.receiverContact}</p></div>
-                           <div className="col-span-2"><p className="text-slate-500">Receiver ID Proof</p><p className="font-semibold text-slate-900 dark:text-white">{selectedPerson.reunionDetails.receiverIdProof}</p></div>
-                           <div className="col-span-2"><p className="text-slate-500">Permanent Address</p><p className="font-semibold text-slate-900 dark:text-white">{selectedPerson.reunionDetails.receiverAddress}</p></div>
-                         </div>
-                       </div>
-                     )}
+                  <div className="text-center w-full">
+                    <span
+                      className={`px-4 py-1.5 block rounded-md text-sm font-bold tracking-wide mb-2 ${selectedPerson.status === "Reunited" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400" : "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400"}`}
+                    >
+                      Status: {selectedPerson.status}
+                    </span>
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full block">
+                      Days in Shelter:{" "}
+                      {calculateDays(
+                        selectedPerson.arrivalDateTime,
+                        selectedPerson.reunionDetails?.dateOfLeaving,
+                      )}
+                    </span>
                   </div>
-               </div>
+                </div>
+                <div className="w-full md:w-2/3 space-y-6">
+                  <div>
+                    <h4 className="text-xs font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-2 mb-3">
+                      Personal Information
+                    </h4>
+                    <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
+                      <div>
+                        <p className="text-slate-500">Full Name</p>
+                        <p className="font-semibold text-slate-900 dark:text-white">
+                          {selectedPerson.fullName ||
+                            selectedPerson.name ||
+                            "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-slate-500">Age & Gender</p>
+                        <p className="font-semibold text-slate-900 dark:text-white">
+                          {selectedPerson.age || "N/A"} •{" "}
+                          {selectedPerson.gender || "N/A"}
+                        </p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-slate-500">Location Found</p>
+                        <p className="font-semibold text-slate-900 dark:text-white">
+                          {selectedPerson.address ||
+                            selectedPerson.location ||
+                            "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-2 mb-3">
+                      Admission Details
+                    </h4>
+                    <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
+                      <div>
+                        <p className="text-slate-500">Brought By</p>
+                        <p className="font-semibold text-slate-900 dark:text-white">
+                          {selectedPerson.broughtBy || "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-slate-500">Arrival Date</p>
+                        <p className="font-semibold text-slate-900 dark:text-white">
+                          {selectedPerson.arrivalDateTime
+                            ? new Date(
+                                selectedPerson.arrivalDateTime,
+                              ).toLocaleString()
+                            : "N/A"}
+                        </p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-slate-500">Reason</p>
+                        <p className="font-semibold text-slate-900 dark:text-white">
+                          {selectedPerson.reason || "N/A"}
+                        </p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-slate-500">
+                          Condition / Description
+                        </p>
+                        <p className="font-semibold text-slate-900 dark:text-white">
+                          {selectedPerson.condition ||
+                            selectedPerson.description ||
+                            "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  {selectedPerson.status === "Reunited" &&
+                    selectedPerson.reunionDetails && (
+                      <div className="bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-800/30">
+                        <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-wider border-b border-emerald-200 dark:border-emerald-800 pb-2 mb-3">
+                          🤝 Reunion Details (Security Log)
+                        </h4>
+                        <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
+                          <div>
+                            <p className="text-slate-500">Date of Leaving</p>
+                            <p className="font-semibold text-slate-900 dark:text-white">
+                              {new Date(
+                                selectedPerson.reunionDetails.dateOfLeaving,
+                              ).toLocaleString()}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-slate-500">Receiver Name</p>
+                            <p className="font-semibold text-slate-900 dark:text-white">
+                              {selectedPerson.reunionDetails.receiverName}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-slate-500">Relationship</p>
+                            <p className="font-semibold text-slate-900 dark:text-white">
+                              {selectedPerson.reunionDetails.receiverRelation}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-slate-500">Contact No.</p>
+                            <p className="font-semibold text-slate-900 dark:text-white">
+                              {selectedPerson.reunionDetails.receiverContact}
+                            </p>
+                          </div>
+                          <div className="col-span-2">
+                            <p className="text-slate-500">Receiver ID Proof</p>
+                            <p className="font-semibold text-slate-900 dark:text-white">
+                              {selectedPerson.reunionDetails.receiverIdProof}
+                            </p>
+                          </div>
+                          <div className="col-span-2">
+                            <p className="text-slate-500">Permanent Address</p>
+                            <p className="font-semibold text-slate-900 dark:text-white">
+                              {selectedPerson.reunionDetails.receiverAddress}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                </div>
+              </div>
             </div>
             <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 text-right">
-              <button onClick={() => setSelectedPerson(null)} className="px-6 py-2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">Close Window</button>
+              <button
+                onClick={() => setSelectedPerson(null)}
+                className="px-6 py-2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+              >
+                Close Window
+              </button>
             </div>
           </div>
         </div>

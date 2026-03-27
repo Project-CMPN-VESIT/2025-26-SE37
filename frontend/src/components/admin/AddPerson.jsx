@@ -22,6 +22,7 @@ const AddPerson = () => {
     setIsSubmitting(true);
 
     try {
+      const token = localStorage.getItem("adminToken");
       const dataToSend = new FormData();
       Object.keys(formData).forEach((key) => {
         if (formData[key] !== null && formData[key] !== "") {
@@ -31,6 +32,7 @@ const AddPerson = () => {
 
       const response = await fetch("http://localhost:5000/api/persons/add", {
         method: "POST",
+        headers: { "Authorization": `Bearer ${token}` },
         body: dataToSend,
       });
 

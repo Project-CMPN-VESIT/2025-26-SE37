@@ -6,6 +6,8 @@ const ManageEvents = () => {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const adminRole = localStorage.getItem("adminRole");
+
   const initialForm = { title: "", date: "", location: "", description: "", image: null };
   const [formData, setFormData] = useState(initialForm);
 
@@ -24,7 +26,11 @@ const ManageEvents = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this event permanently?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/events/delete/${id}`, { method: "DELETE" });
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`http://localhost:5000/api/events/delete/${id}`, { 
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
       if (res.ok) loadEvents();
     } catch (e) { alert("Failed to delete event"); }
   };
@@ -33,11 +39,16 @@ const ManageEvents = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const token = localStorage.getItem("adminToken");
       const dataToSend = new FormData();
       Object.keys(formData).forEach((key) => {
         if (formData[key] !== null && formData[key] !== "") dataToSend.append(key, formData[key]);
       });
-      const response = await fetch("http://localhost:5000/api/events/add", { method: "POST", body: dataToSend });
+      const response = await fetch("http://localhost:5000/api/events/add", { 
+        method: "POST", 
+        headers: { "Authorization": `Bearer ${token}` },
+        body: dataToSend 
+      });
       const data = await response.json();
       if (data.success) {
         alert("Event published successfully!");
@@ -80,9 +91,15 @@ const ManageEvents = () => {
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Event Photo *</label>
               <input type="file" required id="event-photo-upload" accept="image/*" onChange={(e) => setFormData({...formData, image: e.target.files[0]})} className="w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-900/30 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900/50 transition-colors" />
             </div>
-            <button type="submit" disabled={isSubmitting} className="w-full flex justify-center items-center gap-2 bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
-              <CalendarPlus size={18} /> {isSubmitting ? "Publishing..." : "Publish Event"}
-            </button>
+            {adminRole === "superadmin" ? (
+              <button type="submit" disabled={isSubmitting} className="w-full flex justify-center items-center gap-2 bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
+                <CalendarPlus size={18} /> {isSubmitting ? "Publishing..." : "Publish Event"}
+              </button>
+            ) : (
+              <div className="text-center p-3 bg-slate-100 dark:bg-slate-800 text-slate-500 text-sm rounded-lg border border-slate-200 dark:border-slate-700">
+                Only Super Admin can post new events.
+              </div>
+            )}
           </form>
         </div>
 
@@ -112,9 +129,11 @@ const ManageEvents = () => {
                       <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">📍 {evt.location}</p>
                       <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 mb-4">{evt.description}</p>
                     </div>
-                    <button onClick={() => handleDelete(evt._id)} className="w-full flex justify-center items-center gap-2 text-rose-500 hover:text-white dark:text-rose-400 font-bold text-sm bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-600 dark:hover:bg-rose-600 border border-rose-100 dark:border-rose-800/50 hover:border-transparent py-2 rounded-lg transition-colors mt-auto">
-                      <Trash2 size={16} /> Delete Event
-                    </button>
+                    {adminRole === "superadmin" && (
+                      <button onClick={() => handleDelete(evt._id)} className="w-full flex justify-center items-center gap-2 text-rose-500 hover:text-white dark:text-rose-400 font-bold text-sm bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-600 dark:hover:bg-rose-600 border border-rose-100 dark:border-rose-800/50 hover:border-transparent py-2 rounded-lg transition-colors mt-auto">
+                        <Trash2 size={16} /> Delete Event
+                      </button>
+                    )}
                   </div>
                 </div>
               ))

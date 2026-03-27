@@ -1,212 +1,263 @@
 import React, { useState, useEffect } from "react";
-import { Trash2, Phone, User } from "lucide-react";
+import { Clock, ShieldCheck, Ban, Trash2, Eye, AlertTriangle, MapPin, Phone, User, Camera, Info, Activity } from "lucide-react";
 
-const MissingReports = () => {
-  const [reports, setReports] = useState([]);
-  const [publishedPersons, setPublishedPersons] = useState([]);
+const RescueRequests = () => {
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState("claims"); 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [viewMode, setViewMode] = useState("active");
+  const [selectedReq, setSelectedReq] = useState(null);
 
-  const initialForm = { name: "", age: "", missingSince: "", location: "", image: null };
-  const [formData, setFormData] = useState(initialForm);
+  const adminRole = localStorage.getItem("adminRole");
 
-  const loadData = async () => {
+  const loadRequests = async () => {
     setLoading(true);
     try {
-      const [reportsRes, publishedRes] = await Promise.all([
-        fetch("http://localhost:5000/api/reports/all"),
-        fetch("http://localhost:5000/api/missing-persons/all")
-      ]);
-      const reportsJson = await reportsRes.json();
-      const publishedJson = await publishedRes.json();
-      
-      if (reportsJson.success) setReports(reportsJson.data);
-      if (publishedJson.success) setPublishedPersons(publishedJson.data);
-    } catch (e) { console.error("Failed to load data", e); } 
+      const token = localStorage.getItem("adminToken"); 
+      const res = await fetch("http://localhost:5000/api/rescue-requests/all", {
+        headers: { "Authorization": `Bearer ${token}` } 
+      });
+      const json = await res.json();
+      if (json.success) setRequests(json.data);
+    } catch (e) { console.error("Failed", e); } 
     finally { setLoading(false); }
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { loadRequests(); }, []);
 
-  const handleDeleteReport = async (id) => {
-    if (!window.confirm("Delete this claim permanently?")) return;
+  const handleUpdateStatus = async (id, newStatus) => {
+    if (!window.confirm(`Mark this alert as ${newStatus}?`)) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/reports/delete/${id}`, { method: "DELETE" });
-      if (res.ok) loadData();
-    } catch (e) { alert("Failed to delete claim"); }
-  };
-
-  const handleDeletePublished = async (id) => {
-    if (!window.confirm("Remove this case from the public website?")) return;
-    try {
-      const res = await fetch(`http://localhost:5000/api/missing-persons/delete/${id}`, { method: "DELETE" });
-      if (res.ok) loadData();
-    } catch (e) { alert("Failed to delete record"); }
-  };
-
-  const handlePublishSubmit = async (e) => {
-    e.preventDefault();
-    if (publishedPersons.length >= 6) {
-      alert("You can only publish up to 6 missing persons at a time.");
-      return;
-    }
-    
-    setIsSubmitting(true);
-    try {
-      const dataToSend = new FormData();
-      Object.keys(formData).forEach((key) => {
-        if (formData[key] !== null && formData[key] !== "") dataToSend.append(key, formData[key]);
+      const token = localStorage.getItem("adminToken"); 
+      const res = await fetch(`http://localhost:5000/api/rescue-requests/update/${id}`, {
+        method: "PATCH", 
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` 
+        }, 
+        body: JSON.stringify({ status: newStatus }),
       });
-
-      const response = await fetch("http://localhost:5000/api/missing-persons/add", { method: "POST", body: dataToSend });
-      const data = await response.json();
-
-      if (data.success) {
-        alert("Case published to public website successfully!");
-        setFormData(initialForm);
-        document.getElementById("missing-photo-upload").value = "";
-        loadData();
-      } else { alert("Error: " + data.message); }
-    } catch (error) { alert("Server connection failed!"); } 
-    finally { setIsSubmitting(false); }
+      if (res.ok) {
+        loadRequests();
+        setSelectedReq(null);
+      }
+    } catch (e) { alert("Failed"); }
   };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Bhai, delete karna hai?")) return;
+    try {
+      const token = localStorage.getItem("adminToken"); 
+      const res = await fetch(`http://localhost:5000/api/rescue-requests/delete/${id}`, { 
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` } 
+      });
+      const data = await res.json();
+      if (res.ok) {
+        loadRequests();
+        setSelectedReq(null);
+      } else {
+        alert(data.message || "Delete failed!"); 
+      }
+    } catch (e) { alert("Delete failed!"); }
+  };
+
+  const filteredRequests = requests.filter((r) => {
+    const isResolved = r.status === "Rescued" || r.status === "Invalid";
+    return viewMode === "active" ? !isResolved : isResolved;
+  });
+
+  const DetailRow = ({ icon: Icon, label, value }) => (
+    <div className="flex items-start gap-3.5">
+      <div className="mt-0.5 p-2 rounded-lg bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">
+        <Icon size={18} strokeWidth={2.2} />
+      </div>
+      <div className="flex-1">
+        <p className="text-xs font-semibold text-slate-500 dark:text-slate-500 uppercase tracking-wide">{label}</p>
+        <p className="text-sm font-semibold text-slate-900 dark:text-white mt-0.5 leading-relaxed">{value || "N/A"}</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors duration-300">
-      <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden transition-colors duration-300 relative font-sans">
+      
+      <div className="p-7 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-xl font-bold text-rose-600 dark:text-rose-500 font-heading">Missing Persons Portal</h2>
-          <span className="text-sm text-slate-500 dark:text-slate-400 mt-1 block">Manage claims and public listings</span>
+          <h2 className="text-2xl font-extrabold text-slate-950 dark:text-white font-heading flex items-center gap-2">
+            <AlertTriangle className="text-rose-500" /> Emergency Alerts
+          </h2>
+          <span className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 block">Prioritize and manage active rescue missions</span>
         </div>
-
-        <div className="flex gap-2 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-lg w-fit">
-          <button onClick={() => setViewMode("claims")} className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-all ${viewMode === "claims" ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-slate-400"}`}>Public Claims</button>
-          <button onClick={() => setViewMode("manage")} className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-all ${viewMode === "manage" ? "bg-white dark:bg-slate-700 text-rose-600 dark:text-rose-400 shadow-sm" : "text-slate-500 dark:text-slate-400"}`}>Publish Cases ({publishedPersons.length}/6)</button>
+        <div className="flex gap-2.5 bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-2xl w-fit border border-slate-200 dark:border-slate-700/50">
+          <button onClick={() => setViewMode("active")} className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center gap-2 ${viewMode === "active" ? "bg-white dark:bg-slate-700 text-rose-600 dark:text-rose-400 shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-rose-600"}`}>
+            Active Alerts {viewMode === "active" && <span className="px-2 py-0.5 rounded-md bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-xs">{filteredRequests.length}</span>}
+          </button>
+          <button onClick={() => setViewMode("resolved")} className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center gap-2 ${viewMode === "resolved" ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-800"}`}>
+            Past Records
+          </button>
         </div>
       </div>
       
-      {viewMode === "claims" && (
-        <div className="overflow-x-auto min-h-[300px]">
-          <table className="w-full text-left border-collapse min-w-[900px]">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs tracking-wider border-b dark:border-slate-800">
-                <th className="p-4 font-bold uppercase">Claimed Person</th>
-                <th className="p-4 font-bold uppercase">Reporter Details</th>
-                <th className="p-4 font-bold uppercase">Relationship</th>
-                <th className="p-4 font-bold uppercase">Additional Info</th>
-                <th className="p-4 font-bold uppercase">Date</th>
-                <th className="p-4 font-bold uppercase text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
-              {loading ? (
-                <tr><td colSpan="6" className="p-8 text-center text-slate-500 dark:text-slate-400">Loading reports...</td></tr>
-              ) : reports.length === 0 ? (
-                <tr><td colSpan="6" className="p-8 text-center text-slate-500 dark:text-slate-400">No claims reported yet.</td></tr>
-              ) : (
-                reports.map((report) => (
-                  <tr key={report._id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="p-4">
-                      <span className="font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
-                        {report.personName}
+      <div className="overflow-x-auto min-h-[300px]">
+        <table className="w-full text-left border-collapse min-w-[1000px]">
+          <thead>
+            <tr className="bg-slate-50/50 dark:bg-slate-800/30 text-slate-500 dark:text-slate-500 text-xs tracking-wider border-b dark:border-slate-800">
+              <th className="p-5 font-bold uppercase">Location</th>
+              <th className="p-5 font-bold uppercase">Condition</th>
+              <th className="p-5 font-bold uppercase">Reporter</th>
+              <th className="p-5 font-bold uppercase text-center">Visuals</th>
+              <th className="p-5 font-bold uppercase text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+            {loading ? <tr><td colSpan="5" className="p-10 text-center text-slate-500">Loading alerts...</td></tr> : filteredRequests.length === 0 ? (
+              <tr><td colSpan="5" className="p-10 text-center text-slate-500">No {viewMode} alerts right now.</td></tr>
+            ) : filteredRequests.map((r) => (
+                <tr key={r._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                  <td className="p-5 font-semibold text-slate-900 dark:text-white max-w-[200px] truncate" title={r.location}>{r.location}</td>
+                  <td className="p-5 text-slate-600 dark:text-slate-300 font-medium">{r.condition}</td>
+                  <td className="p-5">
+                    <div className="text-slate-800 dark:text-slate-200 font-medium">{r.reporterName || "Anonymous"}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{r.reporterPhone}</div>
+                  </td>
+                  <td className="p-5 text-center">
+                    {r.photoUrl ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-bold bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 px-2.5 py-1 rounded-md border border-indigo-100 dark:border-indigo-800/50">
+                        <Camera size={14}/> Attached
                       </span>
-                    </td>
-                    <td className="p-4">
-                      <div className="font-medium text-slate-800 dark:text-slate-200">{report.reporterName}</div>
-                      <div className="text-sm text-rose-600 dark:text-rose-400 font-semibold mt-1 flex items-center gap-1">
-                        <Phone size={12} /> {report.phone}
-                      </div>
-                    </td>
-                    <td className="p-4 text-slate-700 dark:text-slate-300 font-medium">{report.relation}</td>
-                    <td className="p-4 text-slate-600 dark:text-slate-400 text-sm max-w-xs">
-                      {report.message || <span className="text-slate-400 italic">No info</span>}
-                    </td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400 text-sm">{new Date(report.createdAt).toLocaleString("en-IN")}</td>
-                    <td className="p-4 flex justify-center">
-                      <button onClick={() => handleDeleteReport(report._id)} className="flex items-center gap-1.5 text-xs font-bold uppercase px-3 py-1.5 rounded-lg transition-all shadow-sm bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-600 hover:text-white dark:bg-rose-900/40 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-600 dark:hover:text-white dark:hover:border-transparent">
-                        <Trash2 size={14} strokeWidth={2.5} /> Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {viewMode === "manage" && (
-        <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-100 dark:border-slate-800">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Post New Case</h3>
-            {publishedPersons.length >= 6 && (
-              <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-lg text-sm border border-amber-200 dark:border-amber-800/50">
-                ⚠️ Maximum limit of 6 cases reached. Delete an older case to add a new one.
-              </div>
-            )}
-            <form onSubmit={handlePublishSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Full Name *</label>
-                <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 outline-none" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Age *</label>
-                  <input type="number" required value={formData.age} onChange={(e) => setFormData({...formData, age: e.target.value})} className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Missing Since *</label>
-                  <input type="text" placeholder="e.g., 15 March 2026" required value={formData.missingSince} onChange={(e) => setFormData({...formData, missingSince: e.target.value})} className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 outline-none" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Last Seen Location *</label>
-                <input type="text" required value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-rose-500 outline-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Upload Photo</label>
-                <input type="file" id="missing-photo-upload" accept="image/*" onChange={(e) => setFormData({...formData, image: e.target.files[0]})} className="w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-rose-50 file:text-rose-700 dark:file:bg-rose-900/30 dark:file:text-rose-400 hover:file:bg-rose-100 dark:hover:file:bg-rose-900/50 transition-colors" />
-              </div>
-              <button type="submit" disabled={isSubmitting || publishedPersons.length >= 6} className="w-full bg-rose-600 text-white font-bold py-3 rounded-lg hover:bg-rose-700 transition-colors disabled:opacity-50">
-                {isSubmitting ? "Publishing..." : "🚀 Publish to Website"}
-              </button>
-            </form>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Active Published Cases</h3>
-            <div className="space-y-3">
-              {publishedPersons.length === 0 ? (
-                <div className="p-6 text-center text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">No cases published currently.</div>
-              ) : (
-                publishedPersons.map((person) => (
-                  <div key={person._id} className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center">
-                        {person.imageUrl ? (
-                          <img src={`http://localhost:5000${person.imageUrl}`} alt={person.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <User className="text-slate-400" size={24} />
-                        )}
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-slate-900 dark:text-white text-sm">{person.name}</h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{person.location}</p>
-                      </div>
-                    </div>
-                    <button onClick={() => handleDeletePublished(person._id)} className="flex items-center gap-1.5 text-rose-500 hover:text-white dark:text-rose-400 font-bold text-sm bg-rose-50 dark:bg-rose-900/20 border border-rose-100 hover:bg-rose-600 dark:hover:bg-rose-600 dark:border-rose-800/50 px-3 py-1.5 rounded-lg transition-all shadow-sm">
-                      <Trash2 size={14} strokeWidth={2.5} /> Remove
+                    ) : (
+                      <span className="text-slate-400 text-xs italic">N/A</span>
+                    )}
+                  </td>
+                  <td className="p-5 flex justify-center items-center gap-2">
+                    <button onClick={() => setSelectedReq(r)} className="flex items-center gap-1.5 text-xs font-bold uppercase px-3 py-1.5 rounded-lg transition-all shadow-sm bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800/50 dark:hover:bg-blue-600 dark:hover:text-white dark:hover:border-transparent">
+                      <Eye size={14} strokeWidth={2.5}/> View
                     </button>
+
+                    {viewMode === "active" ? (
+                      <>
+                        {r.status !== "In Progress" && (
+                          <button onClick={() => handleUpdateStatus(r._id, "In Progress")} className="flex items-center gap-1.5 text-xs font-bold uppercase px-3 py-1.5 rounded-lg transition-all shadow-sm bg-amber-50 text-amber-600 border border-amber-100 hover:bg-amber-600 hover:text-white dark:bg-amber-900/40 dark:text-amber-400 dark:border-amber-800/50 dark:hover:bg-amber-600 dark:hover:text-white dark:hover:border-transparent">
+                            <Clock size={14} strokeWidth={2.5} /> Progress
+                          </button>
+                        )}
+                        <button onClick={() => handleUpdateStatus(r._id, "Rescued")} className="flex items-center gap-1.5 text-xs font-bold uppercase px-3 py-1.5 rounded-lg transition-all shadow-sm bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white dark:bg-emerald-900/40 dark:text-emerald-400 dark:border-emerald-800/50 dark:hover:bg-emerald-600 dark:hover:text-white dark:hover:border-transparent">
+                          <ShieldCheck size={14} strokeWidth={2.5} /> Rescued
+                        </button>
+                        <button onClick={() => handleUpdateStatus(r._id, "Invalid")} className="flex items-center gap-1.5 text-xs font-bold uppercase px-3 py-1.5 rounded-lg transition-all shadow-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-500 hover:text-white dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-600 dark:hover:text-white dark:hover:border-transparent">
+                          <Ban size={14} strokeWidth={2.5} /> Invalid
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-xs font-bold uppercase px-3 py-1.5 rounded-lg border bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">
+                        {r.status}
+                      </span>
+                    )}
+                    
+                    {adminRole === "superadmin" && (
+                      <button onClick={() => handleDelete(r._id)} className="flex items-center gap-1.5 text-xs font-bold uppercase px-3 py-1.5 rounded-lg transition-all shadow-sm bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-600 hover:text-white dark:bg-rose-900/40 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-600 dark:hover:text-white dark:hover:border-transparent">
+                        <Trash2 size={14} strokeWidth={2.5} />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+
+      {selectedReq && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm transition-opacity duration-300">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-hidden flex flex-col border border-slate-100 dark:border-slate-800 animate-fadeInUp">
+            
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-rose-50 dark:bg-rose-950/30">
+              <div className="flex items-center gap-4">
+                 <div className="p-3.5 rounded-2xl bg-white dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800">
+                    <AlertTriangle size={28} strokeWidth={2.5}/>
+                 </div>
+                 <div>
+                    <h3 className="text-2xl font-extrabold font-heading text-slate-950 dark:text-white">Emergency Assessment</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
+                      <Clock size={14}/> Reported on: {new Date(selectedReq.createdAt).toLocaleString("en-IN")}
+                    </p>
+                 </div>
+              </div>
+              <button onClick={() => setSelectedReq(null)} className="p-2 rounded-full text-slate-400 hover:bg-rose-100 hover:text-rose-500 dark:hover:bg-rose-950/50 transition-colors text-3xl leading-none">&times;</button>
+            </div>
+            
+            <div className="p-8 overflow-y-auto">
+              <div className="flex flex-col lg:flex-row gap-8">
+                
+                <div className="w-full lg:w-5/12 flex flex-col gap-3">
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white border-l-4 border-rose-500 pl-3">Visual Evidence</h4>
+                  <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center relative">
+                    {selectedReq.photoUrl ? (
+                      <img 
+                        src={selectedReq.photoUrl.startsWith("http") ? selectedReq.photoUrl : `http://localhost:5000${selectedReq.photoUrl}`} 
+                        alt="Rescue Subject" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "block"; }}
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center text-slate-400 gap-2">
+                        <Camera size={32} opacity={0.5}/>
+                        <span className="text-sm font-medium">No photo provided</span>
+                      </div>
+                    )}
                   </div>
-                ))
-              )}
+                  
+                  <div className={`mt-2 p-4 rounded-2xl border flex items-center justify-between ${
+                    selectedReq.status === 'Rescued' ? 'bg-emerald-50 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800' :
+                    selectedReq.status === 'In Progress' ? 'bg-amber-50 border-amber-100 dark:bg-amber-900/20 dark:border-amber-800' :
+                    selectedReq.status === 'Invalid' ? 'bg-slate-100 border-slate-200 dark:bg-slate-800 dark:border-slate-700' :
+                    'bg-rose-50 border-rose-100 dark:bg-rose-900/20 dark:border-rose-800'
+                  }`}>
+                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase">Current Status</span>
+                    <span className={`text-base font-extrabold px-3 py-1 rounded-lg bg-white dark:bg-slate-950 shadow-sm ${
+                      selectedReq.status === 'Rescued' ? 'text-emerald-600 dark:text-emerald-400' :
+                      selectedReq.status === 'In Progress' ? 'text-amber-600 dark:text-amber-400' :
+                      selectedReq.status === 'Invalid' ? 'text-slate-500' : 'text-rose-600 dark:text-rose-400'
+                    }`}>
+                      {selectedReq.status || 'Pending Review'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="w-full lg:w-7/12 space-y-8">
+                  <div className="space-y-6 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-inner">
+                    <DetailRow icon={MapPin} label="Exact Location Found" value={selectedReq.location} />
+                    <DetailRow icon={Activity} label="Observed Condition" value={selectedReq.condition} />
+                  </div>
+
+                  <div className="space-y-6 bg-indigo-50/50 dark:bg-indigo-950/20 p-6 rounded-2xl border border-indigo-100 dark:border-indigo-900/50">
+                    <h4 className="text-sm font-bold text-indigo-800 dark:text-indigo-300 border-b border-indigo-200 dark:border-indigo-800 pb-2 mb-4 flex items-center gap-2">
+                      <Info size={18}/> Reporter Information
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <DetailRow icon={User} label="Reported By" value={selectedReq.reporterName || "Anonymous Good Samaritan"} />
+                      <DetailRow icon={Phone} label="Contact Number" value={<a href={`tel:${selectedReq.reporterPhone}`} className="text-indigo-600 dark:text-indigo-400 font-mono hover:underline">{selectedReq.reporterPhone}</a>} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-5 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 flex justify-end items-center gap-3">
+              <button onClick={() => setSelectedReq(null)} className="px-6 py-2.5 bg-white dark:bg-slate-700 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl font-semibold hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors">Close Window</button>
             </div>
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeInUp { animation: fadeInUp 0.4s ease-out forwards; }
+      `}</style>
     </div>
   );
 };
 
-export default MissingReports;
+export default RescueRequests;
