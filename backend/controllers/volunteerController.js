@@ -2,10 +2,24 @@ const Volunteer = require("../models/Volunteer");
 
 const addVolunteer = async (req, res) => {
   try {
-    const { name, gender, age, idType, idNumber, profession, phone, email, address, helpText, availability } = req.body;
+    const {
+      name,
+      gender,
+      age,
+      idType,
+      idNumber,
+      profession,
+      phone,
+      email,
+      address,
+      helpText,
+      availability,
+    } = req.body;
 
     if (!name || !phone || !email || !idNumber) {
-      return res.status(400).json({ success: false, message: "Required fields are missing" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Required fields are missing" });
     }
 
     const newVolunteer = await Volunteer.create(req.body);
@@ -30,7 +44,7 @@ const updateVolunteerStatus = async (req, res) => {
     const updatedVolunteer = await Volunteer.findByIdAndUpdate(
       req.params.id,
       { $set: { status: req.body.status } },
-      { new: true }
+      { returnDocument: "after" },
     );
     res.status(200).json({ success: true, data: updatedVolunteer });
   } catch (error) {
@@ -47,4 +61,9 @@ const deleteVolunteer = async (req, res) => {
   }
 };
 
-module.exports = { addVolunteer, getVolunteers, updateVolunteerStatus, deleteVolunteer };
+module.exports = {
+  addVolunteer,
+  getVolunteers,
+  updateVolunteerStatus,
+  deleteVolunteer,
+};

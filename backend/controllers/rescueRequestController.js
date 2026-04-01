@@ -41,7 +41,7 @@ const updateRescueStatus = async (req, res) => {
     const updated = await RescueRequest.findByIdAndUpdate(
       req.params.id,
       { status: req.body.status },
-      { new: true },
+      { returnDocument: "after" },
     );
     res.status(200).json({ success: true, data: updated });
   } catch (error) {
@@ -67,12 +67,10 @@ const deleteRescueRequest = async (req, res) => {
     }
 
     await RescueRequest.findByIdAndDelete(req.params.id);
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Deleted securely from Database & Cloud",
-      });
+    res.status(200).json({
+      success: true,
+      message: "Deleted securely from Database & Cloud",
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: "Delete failed" });
   }

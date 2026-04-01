@@ -43,7 +43,7 @@ const updateDonationStatus = async (req, res) => {
     const updatedDonation = await Donation.findByIdAndUpdate(
       req.params.id,
       { status: req.body.status },
-      { new: true },
+      { returnDocument: "after" },
     );
     res.status(200).json({ success: true, data: updatedDonation });
   } catch (error) {

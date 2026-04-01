@@ -72,7 +72,7 @@ const updatePersonStatus = async (req, res) => {
     const updatedPerson = await Person.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
-      { new: true },
+      { returnDocument: "after" },
     );
     res.status(200).json({ success: true, data: updatedPerson });
   } catch (error) {
