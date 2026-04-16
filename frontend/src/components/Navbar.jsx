@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { CiLight, CiDark } from "react-icons/ci";
-// DHYAAN DE: Apni .jpg ya .png logo file ka sahi naam yahan check kar lena 👇
 import logo from "../assets/logo.jpg";
 
 const Navbar = () => {
@@ -10,7 +9,6 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
-  // Glassmorphism effect jab user scroll kare
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 20) {
@@ -50,7 +48,6 @@ const Navbar = () => {
   ];
 
   return (
-    // FIX: Maine `fixed` rakha hai par glassmorphism add kiya hai background mein
     <nav
       className={`fixed w-full z-50 top-0 left-0 transition-all duration-500 font-sans 
       ${
@@ -72,7 +69,6 @@ const Navbar = () => {
               <img
                 src={logo}
                 alt="Maa Astha Logo"
-                // Premium size adjust kiya hai, group-hover par chhota sa zoom diya hai
                 className="h-12 w-auto object-contain rounded-full shadow-md group-hover:scale-105 transition-transform"
               />
               <span className="font-heading font-black text-2xl tracking-tighter text-ngo-dark dark:text-white group-hover:text-ngo-green transition-colors">

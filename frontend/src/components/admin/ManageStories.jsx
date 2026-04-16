@@ -214,25 +214,34 @@ const ManageStories = () => {
                   key={story._id}
                   className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row"
                 >
-                  <div className="w-full sm:w-2/5 grid grid-cols-2 bg-slate-200 dark:bg-slate-700">
-                    <div className="relative border-r-2 border-white dark:border-slate-800">
-                      <div className="absolute top-2 left-2 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                        Before
+                  {/* 🔥 FIX: Added z-10 to the labels so images don't hide them */}
+                  <div className="grid grid-cols-2 h-40 sm:h-48 bg-slate-200 dark:bg-slate-700">
+                    <div className="relative border-r-2 border-white dark:border-slate-900">
+                      <div className="absolute top-2 left-2 z-10 bg-rose-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-md">
+                        Before (बचावपूर्वी)
                       </div>
                       <img
                         src={story.beforeImageUrl}
                         alt="Before"
-                        className="w-full h-full object-cover grayscale"
+                        className="relative z-0 w-full h-full object-cover grayscale"
+                        onError={(e) => {
+                          e.target.src =
+                            "https://via.placeholder.com/400x300?text=Image+Not+Found";
+                        }}
                       />
                     </div>
                     <div className="relative">
-                      <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                        After
+                      <div className="absolute top-2 right-2 z-10 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-md">
+                        After (सुधारणा)
                       </div>
                       <img
                         src={story.afterImageUrl}
                         alt="After"
-                        className="w-full h-full object-cover"
+                        className="relative z-0 w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src =
+                            "https://via.placeholder.com/400x300?text=Image+Not+Found";
+                        }}
                       />
                     </div>
                   </div>

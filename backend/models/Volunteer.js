@@ -5,7 +5,7 @@ const volunteerSchema = new mongoose.Schema(
     name: { type: String, required: true },
     gender: { type: String, required: true },
     age: { type: Number, required: true },
-    idType: { type: String, required: true }, // e.g., Aadhar, PAN, Voter ID
+    idType: { type: String, required: true }, 
     idNumber: { type: String, required: true },
     profession: { type: String, required: true },
     phone: { type: String, required: true },

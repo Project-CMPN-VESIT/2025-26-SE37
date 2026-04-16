@@ -179,7 +179,6 @@ const ManageEvents = () => {
               />
             </div>
 
-            {/* 🔥 FIX: Superadmin check hata diya, ab koi bhi admin publish kar sakta hai */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -241,7 +240,6 @@ const ManageEvents = () => {
                       </p>
                     </div>
 
-                    {/* 🔥 FIX: Superadmin check delete button se bhi hata diya */}
                     <button
                       onClick={() => handleDelete(evt._id)}
                       className="w-full flex justify-center items-center gap-2 text-rose-500 hover:text-white dark:text-rose-400 font-bold text-sm bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-600 dark:hover:bg-rose-600 border border-rose-100 dark:border-rose-800/50 hover:border-transparent py-2 rounded-lg transition-colors mt-auto"

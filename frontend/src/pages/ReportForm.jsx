@@ -32,7 +32,6 @@ const ReportForm = () => {
     setLoading(true);
 
     try {
-      // 🔥 FIX: Yahan se bhi /add hata diya original route ke liye
       const res = await fetch("http://localhost:5000/api/reports", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

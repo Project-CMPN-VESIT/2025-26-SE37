@@ -8,7 +8,6 @@ import {
   User,
   MessageCircle,
 } from "lucide-react";
-// DHYAAN DE: Apni .jpg ya .png background image ka sahi naam yahan check kar lena 👇
 import contactBg from "../assets/contact-bg.jpg";
 
 const Contact = () => {
@@ -60,10 +59,8 @@ const Contact = () => {
   };
 
   return (
-    // FIX: Maine `min-h-screen` ke saath background image set ki hai
     <div
       className="pt-32 pb-20 min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 font-sans relative"
-      // Background Image styling yahan add ki hai 👇
       style={{
         backgroundImage: `url(${contactBg})`,
         backgroundSize: "cover",

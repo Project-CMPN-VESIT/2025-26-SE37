@@ -24,7 +24,6 @@ const Login = () => {
             <input
               type="email"
               placeholder="Enter your email"
-              /* 🔥 Placeholder aur Dark mode glitch fix kiya */
               className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-ngo-green transition-colors"
             />
           </div>
@@ -35,7 +34,6 @@ const Login = () => {
             <input
               type="password"
               placeholder="Enter your password"
-              /* 🔥 Placeholder fix */
               className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-ngo-green transition-colors"
             />
           </div>

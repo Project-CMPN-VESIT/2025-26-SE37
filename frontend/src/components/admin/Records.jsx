@@ -216,7 +216,7 @@ const Records = () => {
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden font-sans transition-colors duration-300 relative">
-      <div className="p-6 border-b border-slate-100 dark:border-slate-800 space-y-4">
+      <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h2 className="text-xl font-bold text-indigo-600 dark:text-indigo-400 font-heading">
@@ -256,7 +256,7 @@ const Records = () => {
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
-                className={`px-4 py-1.5 text-xs font-bold uppercase rounded-md transition-all ${viewMode === mode ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm" : "text-slate-500 dark:text-slate-400"}`}
+                className={`px-3 sm:px-4 py-1.5 text-xs font-bold uppercase rounded-md transition-all ${viewMode === mode ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm" : "text-slate-500 dark:text-slate-400"}`}
               >
                 {mode === "selfExited"
                   ? "Self Exited"
@@ -269,138 +269,194 @@ const Records = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto min-h-[400px] px-2 pb-4 -mx-2">
-        <table className="w-full text-left border-separate border-spacing-y-4 min-w-[1000px]">
-          <thead>
-            <tr className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-bold">
-              <th className="px-5 py-2">Name & UID</th>
-              <th className="px-5 py-2">Status</th>
-              <th className="px-5 py-2">Date Added</th>
-              <th className="px-5 py-2 text-center w-56">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading && records.length === 0 ? (
-              <tr>
-                <td
-                  colSpan="4"
-                  className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
-                >
-                  Loading database...
-                </td>
-              </tr>
-            ) : filteredRecords.length === 0 ? (
-              <tr>
-                <td
-                  colSpan="4"
-                  className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
-                >
-                  No records found.
-                </td>
-              </tr>
-            ) : (
-              filteredRecords.map((record) => (
-                <tr
-                  key={record._id}
-                  className="group hover:-translate-y-0.5 transition-transform duration-300"
-                >
-                  <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
-                    <div className="font-bold text-slate-900 dark:text-white text-base">
-                      {record.fullName || record.name}
+      <div className="min-h-[400px] px-2 pb-4 -mx-2">
+        {/* MOBILE VIEW (Cards) */}
+        <div className="md:hidden space-y-4 px-2 mt-4">
+          {isLoading && records.length === 0 ? (
+            <div className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">Loading database...</div>
+          ) : filteredRecords.length === 0 ? (
+            <div className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">No records found.</div>
+          ) : (
+            filteredRecords.map((record) => (
+              <div key={record._id} className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 p-4 rounded-2xl shadow-sm space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="font-bold text-slate-900 dark:text-white text-lg">{record.fullName || record.name}</div>
+                    <div className="text-xs font-medium text-slate-500 mt-1">
+                      {record.uid && <span className="font-bold text-indigo-600 dark:text-indigo-400 mr-2 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded">#{record.uid}</span>}
                     </div>
-                    <div className="text-xs font-medium text-slate-500 mt-1.5">
-                      {record.uid ? (
-                        <span className="font-bold text-indigo-600 dark:text-indigo-400 mr-2 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded">
-                          #{record.uid}
-                        </span>
-                      ) : (
-                        ""
-                      )}
-                      {record.address || record.location}
-                    </div>
-                  </td>
-                  <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
-                    <span
-                      className={`px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider border ${
-                        record.status === "Reunited"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50"
-                          : record.status === "Escaped"
-                            ? "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800/50"
-                            : record.status === "Dead"
-                              ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800/50"
-                              : record.status === "Self Exited"
-                                ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50"
-                                : "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-800/50"
-                      }`}
-                    >
+                  </div>
+                  <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
+                      record.status === "Reunited" ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400" :
+                      record.status === "Escaped" ? "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400" :
+                      record.status === "Dead" ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400" :
+                      record.status === "Self Exited" ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400" :
+                      "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400"
+                    }`}>
                       {record.status}
-                    </span>
-                  </td>
-                  <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all text-slate-600 dark:text-slate-400 text-sm font-medium align-top">
-                    {record.arrivalDateTime
-                      ? new Date(record.arrivalDateTime).toLocaleDateString(
-                          "en-IN",
-                        )
-                      : "N/A"}
-                  </td>
-                  <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
-                    <div className="flex flex-col gap-2">
-                      <button
-                        onClick={() => setSelectedPerson(record)}
-                        className="w-full flex items-center justify-start gap-2 px-3 py-1.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-600 hover:text-white dark:bg-indigo-900/40 dark:text-indigo-400 dark:border-indigo-800/50 dark:hover:bg-indigo-600 dark:hover:text-white transition-all text-xs font-bold"
-                      >
-                        <Eye size={14} /> View Details
-                      </button>
-
-                      {record.status === "Sheltered" && (
-                        <div className="grid grid-cols-2 gap-2">
-                          <button
-                            onClick={() => setReunionModal(record)}
-                            className="flex items-center justify-start gap-1.5 px-2 py-1.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-600 hover:text-white dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50 dark:hover:bg-emerald-600 dark:hover:text-white transition-all text-[11px] font-bold"
-                            title="Log Reunion"
-                          >
-                            <Handshake size={12} /> Reunite
-                          </button>
-                          <button
-                            onClick={() =>
-                              setExitModal({ record, type: "Self Exited" })
-                            }
-                            className="flex items-center justify-start gap-1.5 px-2 py-1.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50 dark:hover:bg-blue-600 dark:hover:text-white transition-all text-[11px] font-bold"
-                          >
-                            <LogOut size={12} /> Self Exit
-                          </button>
-                          <button
-                            onClick={() =>
-                              setExitModal({ record, type: "Escaped" })
-                            }
-                            className="flex items-center justify-start gap-1.5 px-2 py-1.5 rounded-md bg-orange-50 text-orange-700 border border-orange-100 hover:bg-orange-600 hover:text-white dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800/50 dark:hover:bg-orange-600 dark:hover:text-white transition-all text-[11px] font-bold"
-                          >
-                            <UserMinus size={12} /> Escaped
-                          </button>
-                          <button
-                            onClick={() => setFuneralModal(record)}
-                            className="flex items-center justify-start gap-1.5 px-2 py-1.5 rounded-md bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-600 hover:text-white dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-600 dark:hover:text-white transition-all text-[11px] font-bold"
-                          >
-                            <HeartPulse size={12} /> Deceased
-                          </button>
-                        </div>
-                      )}
-
-                      {adminRole === "superadmin" && (
-                        <button
-                          onClick={() => handleDelete(record._id)}
-                          className="w-full flex items-center justify-center gap-2 mt-1 px-3 py-1.5 rounded-md bg-red-50 text-red-600 border border-red-100 hover:bg-red-600 hover:text-white dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/50 dark:hover:bg-red-600 dark:hover:text-white transition-all text-xs font-bold opacity-0 group-hover:opacity-100"
-                        >
-                          <Trash2 size={14} /> Delete Record
-                        </button>
-                      )}
+                  </span>
+                </div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">{record.address || record.location}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-500 border-b border-slate-100 dark:border-slate-700/50 pb-3">Added: {record.arrivalDateTime ? new Date(record.arrivalDateTime).toLocaleDateString("en-IN") : "N/A"}</div>
+                
+                {/* Mobile Actions */}
+                <div className="flex flex-col gap-2 pt-1">
+                  <button onClick={() => setSelectedPerson(record)} className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-600 hover:text-white dark:bg-indigo-900/40 dark:text-indigo-400 dark:border-indigo-800/50 transition-all text-xs font-bold">
+                    <Eye size={14} /> View Details
+                  </button>
+                  {record.status === "Sheltered" && (
+                    <div className="grid grid-cols-2 gap-2">
+                       <button onClick={() => setReunionModal(record)} className="flex justify-center items-center gap-1.5 px-2 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 text-[11px] font-bold"><Handshake size={12} /> Reunite</button>
+                       <button onClick={() => setExitModal({ record, type: "Self Exited" })} className="flex justify-center items-center gap-1.5 px-2 py-2 rounded-lg bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-900/30 dark:text-blue-400 text-[11px] font-bold"><LogOut size={12} /> Self Exit</button>
+                       <button onClick={() => setExitModal({ record, type: "Escaped" })} className="flex justify-center items-center gap-1.5 px-2 py-2 rounded-lg bg-orange-50 text-orange-700 border border-orange-100 dark:bg-orange-900/30 dark:text-orange-400 text-[11px] font-bold"><UserMinus size={12} /> Escaped</button>
+                       <button onClick={() => setFuneralModal(record)} className="flex justify-center items-center gap-1.5 px-2 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-100 dark:bg-rose-900/30 dark:text-rose-400 text-[11px] font-bold"><HeartPulse size={12} /> Deceased</button>
                     </div>
+                  )}
+                  {adminRole === "superadmin" && (
+                    <button onClick={() => handleDelete(record._id)} className="w-full flex items-center justify-center gap-2 mt-1 px-3 py-2 rounded-lg bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/30 dark:text-red-400 text-xs font-bold">
+                      <Trash2 size={14} /> Delete Record
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* DESKTOP VIEW (Table) */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left border-separate border-spacing-y-4 min-w-[1000px]">
+            <thead>
+              <tr className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-bold">
+                <th className="px-5 py-2">Name & UID</th>
+                <th className="px-5 py-2">Status</th>
+                <th className="px-5 py-2">Date Added</th>
+                <th className="px-5 py-2 text-center w-56">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading && records.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="4"
+                    className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
+                  >
+                    Loading database...
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : filteredRecords.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="4"
+                    className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
+                  >
+                    No records found.
+                  </td>
+                </tr>
+              ) : (
+                filteredRecords.map((record) => (
+                  <tr
+                    key={record._id}
+                    className="group hover:-translate-y-0.5 transition-transform duration-300"
+                  >
+                    <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
+                      <div className="font-bold text-slate-900 dark:text-white text-base">
+                        {record.fullName || record.name}
+                      </div>
+                      <div className="text-xs font-medium text-slate-500 mt-1.5">
+                        {record.uid ? (
+                          <span className="font-bold text-indigo-600 dark:text-indigo-400 mr-2 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded">
+                            #{record.uid}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                        {record.address || record.location}
+                      </div>
+                    </td>
+                    <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
+                      <span
+                        className={`px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider border ${
+                          record.status === "Reunited"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50"
+                            : record.status === "Escaped"
+                              ? "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800/50"
+                              : record.status === "Dead"
+                                ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800/50"
+                                : record.status === "Self Exited"
+                                  ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50"
+                                  : "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-800/50"
+                        }`}
+                      >
+                        {record.status}
+                      </span>
+                    </td>
+                    <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all text-slate-600 dark:text-slate-400 text-sm font-medium align-top">
+                      {record.arrivalDateTime
+                        ? new Date(record.arrivalDateTime).toLocaleDateString(
+                            "en-IN",
+                          )
+                        : "N/A"}
+                    </td>
+                    <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
+                      <div className="flex flex-col gap-2">
+                        <button
+                          onClick={() => setSelectedPerson(record)}
+                          className="w-full flex items-center justify-start gap-2 px-3 py-1.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-600 hover:text-white dark:bg-indigo-900/40 dark:text-indigo-400 dark:border-indigo-800/50 dark:hover:bg-indigo-600 dark:hover:text-white transition-all text-xs font-bold"
+                        >
+                          <Eye size={14} /> View Details
+                        </button>
+
+                        {record.status === "Sheltered" && (
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              onClick={() => setReunionModal(record)}
+                              className="flex items-center justify-start gap-1.5 px-2 py-1.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-600 hover:text-white dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50 dark:hover:bg-emerald-600 dark:hover:text-white transition-all text-[11px] font-bold"
+                              title="Log Reunion"
+                            >
+                              <Handshake size={12} /> Reunite
+                            </button>
+                            <button
+                              onClick={() =>
+                                setExitModal({ record, type: "Self Exited" })
+                              }
+                              className="flex items-center justify-start gap-1.5 px-2 py-1.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50 dark:hover:bg-blue-600 dark:hover:text-white transition-all text-[11px] font-bold"
+                            >
+                              <LogOut size={12} /> Self Exit
+                            </button>
+                            <button
+                              onClick={() =>
+                                setExitModal({ record, type: "Escaped" })
+                              }
+                              className="flex items-center justify-start gap-1.5 px-2 py-1.5 rounded-md bg-orange-50 text-orange-700 border border-orange-100 hover:bg-orange-600 hover:text-white dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800/50 dark:hover:bg-orange-600 dark:hover:text-white transition-all text-[11px] font-bold"
+                            >
+                              <UserMinus size={12} /> Escaped
+                            </button>
+                            <button
+                              onClick={() => setFuneralModal(record)}
+                              className="flex items-center justify-start gap-1.5 px-2 py-1.5 rounded-md bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-600 hover:text-white dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-600 dark:hover:text-white transition-all text-[11px] font-bold"
+                            >
+                              <HeartPulse size={12} /> Deceased
+                            </button>
+                          </div>
+                        )}
+
+                        {adminRole === "superadmin" && (
+                          <button
+                            onClick={() => handleDelete(record._id)}
+                            className="w-full flex items-center justify-center gap-2 mt-1 px-3 py-1.5 rounded-md bg-red-50 text-red-600 border border-red-100 hover:bg-red-600 hover:text-white dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/50 dark:hover:bg-red-600 dark:hover:text-white transition-all text-xs font-bold opacity-0 group-hover:opacity-100"
+                          >
+                            <Trash2 size={14} /> Delete Record
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* EXIT / ESCAPE MODAL */}

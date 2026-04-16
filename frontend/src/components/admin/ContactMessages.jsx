@@ -60,83 +60,150 @@ const ContactMessages = () => {
         </span>
       </div>
 
-      <div className="overflow-x-auto min-h-[300px] px-2 pb-4 -mx-2">
-        <table className="w-full text-left border-separate border-spacing-y-4 min-w-[800px]">
-          <thead>
-            <tr className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-bold">
-              <th className="px-5 py-2">Sender Info</th>
-              <th className="px-5 py-2">Subject</th>
-              <th className="px-5 py-2 w-1/3">Message</th>
-              <th className="px-5 py-2">Date</th>
-              {adminRole === "superadmin" && (
-                <th className="px-5 py-2 text-center w-32">Action</th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td
-                  colSpan={adminRole === "superadmin" ? 5 : 4}
-                  className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
-                >
-                  Loading messages...
-                </td>
-              </tr>
-            ) : messages.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={adminRole === "superadmin" ? 5 : 4}
-                  className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
-                >
-                  No messages found.
-                </td>
-              </tr>
-            ) : (
-              messages.map((msg) => (
-                <tr
-                  key={msg._id}
-                  className="group hover:-translate-y-0.5 transition-transform duration-300"
-                >
-                  <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
-                    <div className="font-bold text-slate-900 dark:text-white text-sm">
+      <div className="min-h-[300px] px-2 pb-4 -mx-2">
+        {/* MOBILE VIEW (Cards) */}
+        <div className="md:hidden space-y-4 px-2 mt-4 pb-4">
+          {loading ? (
+            <div className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+              Loading messages...
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+              No messages found.
+            </div>
+          ) : (
+            messages.map((msg) => (
+              <div
+                key={msg._id}
+                className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 p-4 rounded-2xl shadow-sm space-y-3"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="font-bold text-slate-900 dark:text-white text-base">
                       {msg.name}
                     </div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
                       {msg.phone}
                     </div>
                     {msg.email && (
-                      <div className="text-xs text-indigo-500 dark:text-indigo-400 font-medium mt-1">
+                      <div className="text-[11px] text-indigo-500 dark:text-indigo-400 font-medium mt-0.5">
                         {msg.email}
                       </div>
                     )}
-                  </td>
-                  <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
-                    <span className="inline-block px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-md text-xs font-bold">
-                      {msg.subject}
-                    </span>
-                  </td>
-                  <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all text-slate-600 dark:text-slate-300 text-sm align-top leading-relaxed">
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-medium text-right">
+                    {new Date(msg.createdAt).toLocaleDateString("en-IN")}
+                    <br />
+                    {new Date(msg.createdAt).toLocaleTimeString("en-IN", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="inline-block px-2 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded text-[10px] font-bold uppercase tracking-wider mb-2">
+                    {msg.subject}
+                  </span>
+                  <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700/50 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                     {msg.message}
+                  </div>
+                </div>
+
+                {adminRole === "superadmin" && (
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-700/50">
+                    <button
+                      onClick={() => handleDelete(msg._id)}
+                      className="w-full flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase px-3 py-2 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-900/40 dark:text-rose-400 dark:border-rose-800/50 hover:bg-rose-600 hover:text-white transition-colors"
+                    >
+                      <Trash2 size={14} strokeWidth={2.5} /> Delete Message
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* DESKTOP VIEW (Table) */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left border-separate border-spacing-y-4 min-w-[800px]">
+            <thead>
+              <tr className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-bold">
+                <th className="px-5 py-2">Sender Info</th>
+                <th className="px-5 py-2">Subject</th>
+                <th className="px-5 py-2 w-1/3">Message</th>
+                <th className="px-5 py-2">Date</th>
+                {adminRole === "superadmin" && (
+                  <th className="px-5 py-2 text-center w-32">Action</th>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan={adminRole === "superadmin" ? 5 : 4}
+                    className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
+                  >
+                    Loading messages...
                   </td>
-                  <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all text-slate-500 dark:text-slate-400 text-xs font-medium align-top">
-                    {new Date(msg.createdAt).toLocaleString("en-IN")}
-                  </td>
-                  {adminRole === "superadmin" && (
-                    <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
-                      <button
-                        onClick={() => handleDelete(msg._id)}
-                        className="w-full flex items-center justify-center gap-1.5 text-xs font-bold uppercase px-3 py-2 rounded-lg transition-all shadow-sm bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-600 hover:text-white dark:bg-rose-900/40 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-600 dark:hover:text-white transition-colors"
-                      >
-                        <Trash2 size={14} strokeWidth={2.5} /> Delete
-                      </button>
-                    </td>
-                  )}
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : messages.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={adminRole === "superadmin" ? 5 : 4}
+                    className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
+                  >
+                    No messages found.
+                  </td>
+                </tr>
+              ) : (
+                messages.map((msg) => (
+                  <tr
+                    key={msg._id}
+                    className="group hover:-translate-y-0.5 transition-transform duration-300"
+                  >
+                    <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
+                      <div className="font-bold text-slate-900 dark:text-white text-sm">
+                        {msg.name}
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
+                        {msg.phone}
+                      </div>
+                      {msg.email && (
+                        <div className="text-xs text-indigo-500 dark:text-indigo-400 font-medium mt-1">
+                          {msg.email}
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
+                      <span className="inline-block px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-md text-xs font-bold">
+                        {msg.subject}
+                      </span>
+                    </td>
+                    <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all text-slate-600 dark:text-slate-300 text-sm align-top leading-relaxed">
+                      {msg.message}
+                    </td>
+                    <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all text-slate-500 dark:text-slate-400 text-xs font-medium align-top">
+                      {new Date(msg.createdAt).toLocaleString("en-IN")}
+                    </td>
+                    {adminRole === "superadmin" && (
+                      <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
+                        <button
+                          onClick={() => handleDelete(msg._id)}
+                          className="w-full flex items-center justify-center gap-1.5 text-xs font-bold uppercase px-3 py-2 rounded-lg transition-all shadow-sm bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-600 hover:text-white dark:bg-rose-900/40 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-600 dark:hover:text-white transition-colors"
+                        >
+                          <Trash2 size={14} strokeWidth={2.5} /> Delete
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

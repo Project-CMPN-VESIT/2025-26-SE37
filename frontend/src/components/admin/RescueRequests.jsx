@@ -177,119 +177,233 @@ const RescueRequests = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto min-h-[300px] px-2 pb-4 -mx-2">
-        <table className="w-full text-left border-separate border-spacing-y-4 min-w-[900px]">
-          <thead>
-            <tr className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-bold">
-              <th className="px-5 py-2 w-[30%]">Location</th>
-              <th className="px-5 py-2 w-[30%]">Condition</th>
-              <th className="px-5 py-2">Reporter</th>
-              <th className="px-5 py-2 text-center w-48">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td
-                  colSpan="4"
-                  className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
-                >
-                  Loading alerts...
-                </td>
-              </tr>
-            ) : filteredRequests.length === 0 ? (
-              <tr>
-                <td
-                  colSpan="4"
-                  className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
-                >
-                  No {viewMode} alerts right now.
-                </td>
-              </tr>
-            ) : (
-              filteredRequests.map((r) => (
-                <tr
-                  key={r._id}
-                  className="group hover:-translate-y-0.5 transition-transform duration-300"
-                >
-                  <td
-                    className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all font-semibold text-slate-900 dark:text-white align-top"
-                    title={r.location}
-                  >
+      <div className="min-h-[300px] px-2 pb-4 -mx-2">
+        {/* MOBILE VIEW (Cards) */}
+        <div className="md:hidden space-y-4 px-2 mt-4 pb-4">
+          {loading ? (
+            <div className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+              Loading alerts...
+            </div>
+          ) : filteredRequests.length === 0 ? (
+            <div className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+              No {viewMode} alerts right now.
+            </div>
+          ) : (
+            filteredRequests.map((r) => (
+              <div
+                key={r._id}
+                className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 p-4 rounded-2xl shadow-sm space-y-3"
+              >
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex-1 font-semibold text-slate-900 dark:text-white text-sm break-words">
                     {formatLocationText(r.location)}
-                  </td>
-                  <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all text-slate-600 dark:text-slate-300 font-medium align-top">
-                    {r.condition}
-                  </td>
-                  <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
-                    <div className="text-slate-800 dark:text-slate-200 font-bold text-sm">
+                  </div>
+                  <span
+                    className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider border shrink-0 ${
+                      r.status === "Rescued"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400"
+                        : r.status === "In Progress"
+                          ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400"
+                          : r.status === "Invalid"
+                            ? "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400"
+                            : "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400"
+                    }`}
+                  >
+                    {r.status}
+                  </span>
+                </div>
+
+                <div className="text-xs text-slate-600 dark:text-slate-300 font-medium bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg border border-slate-100 dark:border-slate-700/50">
+                  <span className="font-bold block mb-1 text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[10px]">
+                    Condition:
+                  </span>
+                  {r.condition}
+                </div>
+
+                <div className="flex justify-between items-center text-xs">
+                  <div>
+                    <div className="text-slate-800 dark:text-slate-200 font-bold">
                       {r.reporterName || "Anonymous"}
                     </div>
-                    <div className="text-xs font-mono text-slate-500 mt-1">
+                    <div className="font-mono text-slate-500">
                       {r.reporterPhone}
                     </div>
-                  </td>
-                  <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
-                    <div className="flex flex-col gap-2">
-                      <button
-                        onClick={() => setSelectedReq(r)}
-                        className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800/50 dark:hover:bg-blue-600 dark:hover:text-white transition-all text-xs font-bold"
-                      >
-                        <Eye size={14} /> View Details
-                      </button>
+                  </div>
+                  <div className="text-slate-400 text-[10px] text-right">
+                    {new Date(r.createdAt).toLocaleDateString("en-IN")}
+                    <br />
+                    {new Date(r.createdAt).toLocaleTimeString("en-IN", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
+                </div>
 
-                      {viewMode === "active" ? (
-                        <div className="grid grid-cols-1 gap-2">
-                          {r.status !== "In Progress" && (
-                            <button
-                              onClick={() =>
-                                handleUpdateStatus(r._id, "In Progress")
-                              }
-                              className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md bg-amber-50 text-amber-700 border border-amber-100 hover:bg-amber-600 hover:text-white dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/50 dark:hover:bg-amber-600 dark:hover:text-white transition-all text-[11px] font-bold"
-                            >
-                              <Clock size={12} /> Mark Progress
-                            </button>
-                          )}
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              onClick={() =>
-                                handleUpdateStatus(r._id, "Rescued")
-                              }
-                              className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-600 hover:text-white dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50 dark:hover:bg-emerald-600 dark:hover:text-white transition-all text-[11px] font-bold"
-                            >
-                              <ShieldCheck size={12} /> Rescued
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleUpdateStatus(r._id, "Invalid")
-                              }
-                              className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-600 hover:text-white dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-600 dark:hover:text-white transition-all text-[11px] font-bold"
-                            >
-                              <Ban size={12} /> Invalid
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="w-full text-center text-xs font-bold uppercase px-3 py-1.5 rounded-lg border bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">
-                          {r.status}
-                        </span>
-                      )}
+                {/* Mobile Actions */}
+                <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                  <button
+                    onClick={() => setSelectedReq(r)}
+                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800/50 transition-all text-[11px] font-bold uppercase"
+                  >
+                    <Eye size={14} /> View Details
+                  </button>
 
-                      {adminRole === "superadmin" && (
+                  {viewMode === "active" && (
+                    <div className="grid grid-cols-2 gap-2">
+                      {r.status !== "In Progress" && (
                         <button
-                          onClick={() => handleDelete(r._id)}
-                          className="w-full flex items-center justify-center gap-2 mt-1 px-3 py-1.5 rounded-md bg-red-50 text-red-600 border border-red-100 hover:bg-red-600 hover:text-white dark:bg-red-900/40 dark:text-red-400 dark:border-red-800/50 dark:hover:bg-red-600 dark:hover:text-white transition-all text-xs font-bold opacity-0 group-hover:opacity-100"
+                          onClick={() =>
+                            handleUpdateStatus(r._id, "In Progress")
+                          }
+                          className="col-span-2 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/50 text-[11px] font-bold uppercase"
                         >
-                          <Trash2 size={14} /> Delete
+                          <Clock size={12} /> Mark Progress
                         </button>
                       )}
+                      <button
+                        onClick={() => handleUpdateStatus(r._id, "Rescued")}
+                        className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50 text-[11px] font-bold uppercase"
+                      >
+                        <ShieldCheck size={12} /> Rescued
+                      </button>
+                      <button
+                        onClick={() => handleUpdateStatus(r._id, "Invalid")}
+                        className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 text-[11px] font-bold uppercase"
+                      >
+                        <Ban size={12} /> Invalid
+                      </button>
                     </div>
+                  )}
+
+                  {adminRole === "superadmin" && (
+                    <button
+                      onClick={() => handleDelete(r._id)}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/40 dark:text-red-400 dark:border-red-800/50 text-[11px] font-bold uppercase"
+                    >
+                      <Trash2 size={14} /> Delete
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* DESKTOP VIEW (Table) */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left border-separate border-spacing-y-4 min-w-[900px]">
+            <thead>
+              <tr className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-bold">
+                <th className="px-5 py-2 w-[30%]">Location</th>
+                <th className="px-5 py-2 w-[30%]">Condition</th>
+                <th className="px-5 py-2">Reporter</th>
+                <th className="px-5 py-2 text-center w-48">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan="4"
+                    className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
+                  >
+                    Loading alerts...
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : filteredRequests.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="4"
+                    className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
+                  >
+                    No {viewMode} alerts right now.
+                  </td>
+                </tr>
+              ) : (
+                filteredRequests.map((r) => (
+                  <tr
+                    key={r._id}
+                    className="group hover:-translate-y-0.5 transition-transform duration-300"
+                  >
+                    <td
+                      className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all font-semibold text-slate-900 dark:text-white align-top"
+                      title={r.location}
+                    >
+                      {formatLocationText(r.location)}
+                    </td>
+                    <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all text-slate-600 dark:text-slate-300 font-medium align-top">
+                      {r.condition}
+                    </td>
+                    <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
+                      <div className="text-slate-800 dark:text-slate-200 font-bold text-sm">
+                        {r.reporterName || "Anonymous"}
+                      </div>
+                      <div className="text-xs font-mono text-slate-500 mt-1">
+                        {r.reporterPhone}
+                      </div>
+                    </td>
+                    <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
+                      <div className="flex flex-col gap-2">
+                        <button
+                          onClick={() => setSelectedReq(r)}
+                          className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800/50 dark:hover:bg-blue-600 dark:hover:text-white transition-all text-xs font-bold"
+                        >
+                          <Eye size={14} /> View Details
+                        </button>
+
+                        {viewMode === "active" ? (
+                          <div className="grid grid-cols-1 gap-2">
+                            {r.status !== "In Progress" && (
+                              <button
+                                onClick={() =>
+                                  handleUpdateStatus(r._id, "In Progress")
+                                }
+                                className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md bg-amber-50 text-amber-700 border border-amber-100 hover:bg-amber-600 hover:text-white dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/50 dark:hover:bg-amber-600 dark:hover:text-white transition-all text-[11px] font-bold"
+                              >
+                                <Clock size={12} /> Mark Progress
+                              </button>
+                            )}
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                onClick={() =>
+                                  handleUpdateStatus(r._id, "Rescued")
+                                }
+                                className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-600 hover:text-white dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50 dark:hover:bg-emerald-600 dark:hover:text-white transition-all text-[11px] font-bold"
+                              >
+                                <ShieldCheck size={12} /> Rescued
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleUpdateStatus(r._id, "Invalid")
+                                }
+                                className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-600 hover:text-white dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-600 dark:hover:text-white transition-all text-[11px] font-bold"
+                              >
+                                <Ban size={12} /> Invalid
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="w-full text-center text-xs font-bold uppercase px-3 py-1.5 rounded-lg border bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">
+                            {r.status}
+                          </span>
+                        )}
+
+                        {adminRole === "superadmin" && (
+                          <button
+                            onClick={() => handleDelete(r._id)}
+                            className="w-full flex items-center justify-center gap-2 mt-1 px-3 py-1.5 rounded-md bg-red-50 text-red-600 border border-red-100 hover:bg-red-600 hover:text-white dark:bg-red-900/40 dark:text-red-400 dark:border-red-800/50 dark:hover:bg-red-600 dark:hover:text-white transition-all text-xs font-bold opacity-0 group-hover:opacity-100"
+                          >
+                            <Trash2 size={14} /> Delete
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {selectedReq && (

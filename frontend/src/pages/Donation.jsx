@@ -92,9 +92,8 @@ const Donation = () => {
               </h2>
               <div className="flex flex-col items-center">
                 <div className="bg-white p-4 rounded-3xl shadow-inner mb-6 border-4 border-slate-50">
-                  {/* Replace this with your actual QR image */}
                   <img
-                    src="/qr-placeholder.png"
+                    src="src/assets/qr-placeholder.png"
                     alt="QR Code"
                     className="w-48 h-48 object-contain"
                   />

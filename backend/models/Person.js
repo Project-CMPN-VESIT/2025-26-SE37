@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const PersonSchema = new mongoose.Schema(
   {
-    uid: { type: String, unique: true, trim: true, sparse: true }, // Naya Unique ID field
+    uid: { type: String, unique: true, trim: true, sparse: true }, 
     name: { type: String, trim: true },
     fullName: { type: String, trim: true },
     age: { type: Number, min: 0 },

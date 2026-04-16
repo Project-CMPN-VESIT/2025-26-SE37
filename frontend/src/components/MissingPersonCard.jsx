@@ -1,51 +1,72 @@
 import React from "react";
+import { MapPin, Calendar, User, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const MissingPersonCard = ({ person }) => {
   const navigate = useNavigate();
 
-  const imageUrl = person.imageUrl || person.image;
-  const imageSrc = imageUrl 
-    ? (imageUrl.startsWith("http") ? imageUrl : `http://localhost:5000${imageUrl}`) 
-    : "https://via.placeholder.com/300x400?text=No+Image";
-
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 flex flex-col">
-      <div className="relative h-64 bg-gray-200 dark:bg-gray-700">
+    <div className="bg-white dark:bg-slate-800 rounded-[2rem] overflow-hidden shadow-lg border border-slate-100 dark:border-slate-700 hover:shadow-2xl transition-all duration-300 flex flex-col group">
+      <div className="relative h-64 overflow-hidden">
         <img
-          src={imageSrc}
+          src={
+            person.imageUrl?.startsWith("http")
+              ? person.imageUrl
+              : `http://localhost:5000${person.imageUrl}`
+          }
           alt={person.name}
-          className="w-full h-full object-cover"
-          onError={(e) => { e.target.src = "https://via.placeholder.com/300x400?text=Image+Not+Found"; }}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={(e) => {
+            e.target.src =
+              "https://via.placeholder.com/400x400?text=Photo+Missing";
+          }}
         />
-        <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse shadow-md tracking-wider">
-          MISSING
+        <div className="absolute top-4 right-4 bg-rose-600 text-white text-[10px] font-black px-3 py-1.5 rounded-lg shadow-lg uppercase tracking-widest animate-pulse">
+          Missing
         </div>
       </div>
 
-      <div className="p-5 flex flex-col flex-grow justify-between gap-4">
-        <div>
-          <h3 className="text-xl font-bold font-heading text-gray-900 dark:text-white mb-3">
-            {person.name}
-          </h3>
-          <div className="text-sm text-gray-600 dark:text-gray-300 space-y-2">
-            <p>
-              <span className="font-semibold text-gray-800 dark:text-gray-200">Age:</span> {person.age} years
-            </p>
-            <p>
-              <span className="font-semibold text-gray-800 dark:text-gray-200">Missing Since:</span> {person.missingSince}
-            </p>
-            <p>
-              <span className="font-semibold text-gray-800 dark:text-gray-200">Last Seen:</span> {person.location}
-            </p>
+      <div className="p-6 flex-1 flex flex-col">
+        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-4 line-clamp-1">
+          {person.name}
+        </h3>
+
+        <div className="space-y-3 flex-1 mb-6">
+          <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+            <User size={18} className="text-rose-500" />
+            <span className="font-semibold">
+              {person.age} Years {person.gender && `• ${person.gender}`}
+            </span>
           </div>
+          <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+            <Calendar size={18} className="text-indigo-500" />
+            <span className="font-semibold">
+              Since: {new Date(person.missingSince).toLocaleDateString("en-IN")}
+            </span>
+          </div>
+          <div className="flex items-start gap-3 text-sm text-slate-700 dark:text-slate-300">
+            <MapPin size={18} className="text-emerald-500 mt-0.5" />
+            <span className="font-semibold line-clamp-2">
+              {person.location}
+            </span>
+          </div>
+
+          {/* 🔥 DHYAAN SE DEKH: Ye hai description ka travel logic */}
+          {person.description && (
+            <div className="mt-4 p-3.5 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl flex gap-3">
+              <Info size={16} className="text-amber-600 shrink-0 mt-0.5" />
+              <p className="text-xs font-medium italic text-slate-600 dark:text-slate-400 leading-relaxed">
+                "{person.description}"
+              </p>
+            </div>
+          )}
         </div>
 
         <button
-          onClick={() => navigate('/report-missing', { state: person })}
-          className="w-full bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 font-bold py-3 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors border border-red-200 dark:border-red-800/50 shadow-sm flex justify-center items-center gap-2 mt-auto"
+          onClick={() => navigate("/report-missing", { state: person })}
+          className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl hover:bg-ngo-green dark:hover:bg-ngo-green transition-all uppercase tracking-wide text-xs"
         >
-          <span>🚨</span> I Have Info / Claim
+          I Have Information
         </button>
       </div>
     </div>

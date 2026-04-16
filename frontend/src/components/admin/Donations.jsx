@@ -162,7 +162,87 @@ const Donations = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto min-h-[300px] px-2 pb-4 -mx-2">
+        {/* MOBILE VIEW (Cards) */}
+        <div className="md:hidden space-y-4 px-2 mt-4 pb-4">
+          {loading ? (
+            <div className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+              Loading records...
+            </div>
+          ) : filteredDonations.length === 0 ? (
+            <div className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+              No donations found.
+            </div>
+          ) : (
+            filteredDonations.map((d) => (
+              <div
+                key={d._id}
+                className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 p-4 rounded-2xl shadow-sm space-y-3"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="font-extrabold text-emerald-600 dark:text-emerald-400 text-xl">
+                      ₹{(Number(d.amount) || 0).toLocaleString("en-IN")}
+                    </div>
+                    <div className="font-bold text-slate-900 dark:text-white text-sm mt-1">
+                      {d.name}
+                    </div>
+                    <div className="text-xs text-slate-500 font-mono">
+                      {d.phone}
+                    </div>
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-md border ${d.status === "Verified" ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400" : d.status === "Invalid" ? "bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400" : "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400"}`}
+                  >
+                    {d.status}
+                  </span>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-lg border border-slate-100 dark:border-slate-700">
+                  <div className="font-mono text-slate-800 dark:text-slate-300 text-xs tracking-wide break-all">
+                    {d.transactionId}
+                  </div>
+                  <div className="text-[10px] font-semibold text-slate-500 mt-1 uppercase tracking-wider">
+                    {d.modeOfPayment} •{" "}
+                    {new Date(d.createdAt).toLocaleDateString("en-IN")}
+                  </div>
+                </div>
+
+                {/* Mobile Actions */}
+                {(viewMode === "pending" || adminRole === "superadmin") && (
+                  <div className="flex flex-col gap-2 pt-2">
+                    {viewMode === "pending" ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => handleUpdateStatus(d._id, "Verified")}
+                          className="flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900"
+                        >
+                          <CheckCircle size={14} strokeWidth={2.5} /> Verify
+                        </button>
+                        <button
+                          onClick={() => handleUpdateStatus(d._id, "Invalid")}
+                          className="flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase px-3 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-100 dark:bg-rose-950 dark:text-rose-400 dark:border-rose-900"
+                        >
+                          <Ban size={14} strokeWidth={2.5} /> Invalid
+                        </button>
+                      </div>
+                    ) : (
+                      adminRole === "superadmin" && (
+                        <button
+                          onClick={() => handleDelete(d._id)}
+                          className="w-full flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase px-3 py-2 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
+                        >
+                          <Trash2 size={14} strokeWidth={2.5} /> Delete
+                        </button>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* DESKTOP VIEW (Table) */}
+        <div className="hidden md:block overflow-x-auto min-h-[300px] px-2 pb-4 -mx-2">
           <table className="w-full text-left border-separate border-spacing-y-4 min-w-[900px]">
             <thead>
               <tr className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-bold">
@@ -170,7 +250,6 @@ const Donations = () => {
                 <th className="px-5 py-2">Amount</th>
                 <th className="px-5 py-2">Transaction Info</th>
                 <th className="px-5 py-2">Status</th>
-                {/* 🔥 FIX: Actions header hidden for normal admins in history mode */}
                 {(viewMode === "pending" || adminRole === "superadmin") && (
                   <th className="px-5 py-2 text-center w-40">Actions</th>
                 )}
@@ -178,50 +257,99 @@ const Donations = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={viewMode === "pending" || adminRole === "superadmin" ? 5 : 4} className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">Loading records...</td></tr>
+                <tr>
+                  <td
+                    colSpan={
+                      viewMode === "pending" || adminRole === "superadmin"
+                        ? 5
+                        : 4
+                    }
+                    className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
+                  >
+                    Loading records...
+                  </td>
+                </tr>
               ) : filteredDonations.length === 0 ? (
-                <tr><td colSpan={viewMode === "pending" || adminRole === "superadmin" ? 5 : 4} className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">No donations found.</td></tr>
+                <tr>
+                  <td
+                    colSpan={
+                      viewMode === "pending" || adminRole === "superadmin"
+                        ? 5
+                        : 4
+                    }
+                    className="p-10 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
+                  >
+                    No donations found.
+                  </td>
+                </tr>
               ) : (
                 filteredDonations.map((d) => (
-                  <tr key={d._id} className="group hover:-translate-y-0.5 transition-transform duration-300">
+                  <tr
+                    key={d._id}
+                    className="group hover:-translate-y-0.5 transition-transform duration-300"
+                  >
                     <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
-                      <div className="font-bold text-slate-900 dark:text-white text-sm">{d.name}</div>
-                      <div className="text-xs text-slate-500 mt-1 font-mono">{d.phone}</div>
+                      <div className="font-bold text-slate-900 dark:text-white text-sm">
+                        {d.name}
+                      </div>
+                      <div className="text-xs text-slate-500 mt-1 font-mono">
+                        {d.phone}
+                      </div>
                     </td>
                     <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top font-extrabold text-emerald-600 dark:text-emerald-400 text-base">
                       ₹{(Number(d.amount) || 0).toLocaleString("en-IN")}
                     </td>
                     <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
-                      <div className="font-mono text-slate-800 dark:text-slate-300 text-sm tracking-wide bg-slate-100 dark:bg-slate-800 inline-block px-2 py-1 rounded">{d.transactionId}</div>
-                      <div className="text-xs font-semibold text-slate-500 mt-1.5 uppercase tracking-wider">{d.modeOfPayment}</div>
-                      <div className="text-[11px] text-slate-400 mt-1">{new Date(d.createdAt).toLocaleString("en-IN")}</div>
+                      <div className="font-mono text-slate-800 dark:text-slate-300 text-sm tracking-wide bg-slate-100 dark:bg-slate-800 inline-block px-2 py-1 rounded">
+                        {d.transactionId}
+                      </div>
+                      <div className="text-xs font-semibold text-slate-500 mt-1.5 uppercase tracking-wider">
+                        {d.modeOfPayment}
+                      </div>
+                      <div className="text-[11px] text-slate-400 mt-1">
+                        {new Date(d.createdAt).toLocaleString("en-IN")}
+                      </div>
                     </td>
                     <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
-                      <span className={`text-xs font-bold uppercase tracking-wide px-3 py-1.5 rounded-md border ${d.status === "Verified" ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" : d.status === "Invalid" ? "bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20" : "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"}`}>
+                      <span
+                        className={`text-xs font-bold uppercase tracking-wide px-3 py-1.5 rounded-md border ${d.status === "Verified" ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" : d.status === "Invalid" ? "bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20" : "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"}`}
+                      >
                         {d.status}
                       </span>
                     </td>
-                    
-                    {/* 🔥 FIX: Cell hidden for normal admins in history mode */}
                     {(viewMode === "pending" || adminRole === "superadmin") && (
                       <td className="p-5 bg-white dark:bg-slate-800/90 border-y border-slate-200 dark:border-slate-700/50 first:border-l last:border-r first:rounded-l-2xl last:rounded-r-2xl shadow-sm group-hover:shadow-md group-hover:border-indigo-200 dark:group-hover:border-indigo-500/50 transition-all align-top">
                         <div className="flex flex-col gap-2">
-                        {viewMode === "pending" ? (
-                          <>
-                            <button onClick={() => handleUpdateStatus(d._id, "Verified")} className="flex items-center justify-center gap-1.5 text-xs font-bold uppercase px-3 py-2 rounded-lg transition-all shadow-sm bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900 dark:hover:bg-emerald-600 dark:hover:text-white transition-colors">
-                              <CheckCircle size={15} strokeWidth={2.5} /> Verify
-                            </button>
-                            <button onClick={() => handleUpdateStatus(d._id, "Invalid")} className="flex items-center justify-center gap-1.5 text-xs font-bold uppercase px-3 py-2 rounded-lg transition-all shadow-sm bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-600 hover:text-white dark:bg-rose-950 dark:text-rose-400 dark:border-rose-900 dark:hover:bg-rose-600 dark:hover:text-white transition-colors">
-                              <Ban size={15} strokeWidth={2.5} /> Invalid
-                            </button>
-                          </>
-                        ) : (
-                          adminRole === "superadmin" && (
-                            <button onClick={() => handleDelete(d._id)} className="flex items-center justify-center gap-1.5 text-xs font-bold uppercase px-3 py-2 rounded-lg transition-all shadow-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-600 hover:text-white dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-600 dark:hover:text-white transition-colors">
-                              <Trash2 size={15} strokeWidth={2.5} /> Delete
-                            </button>
-                          )
-                        )}
+                          {viewMode === "pending" ? (
+                            <>
+                              <button
+                                onClick={() =>
+                                  handleUpdateStatus(d._id, "Verified")
+                                }
+                                className="flex items-center justify-center gap-1.5 text-xs font-bold uppercase px-3 py-2 rounded-lg transition-all shadow-sm bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900 dark:hover:bg-emerald-600 dark:hover:text-white transition-colors"
+                              >
+                                <CheckCircle size={15} strokeWidth={2.5} />{" "}
+                                Verify
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleUpdateStatus(d._id, "Invalid")
+                                }
+                                className="flex items-center justify-center gap-1.5 text-xs font-bold uppercase px-3 py-2 rounded-lg transition-all shadow-sm bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-600 hover:text-white dark:bg-rose-950 dark:text-rose-400 dark:border-rose-900 dark:hover:bg-rose-600 dark:hover:text-white transition-colors"
+                              >
+                                <Ban size={15} strokeWidth={2.5} /> Invalid
+                              </button>
+                            </>
+                          ) : (
+                            adminRole === "superadmin" && (
+                              <button
+                                onClick={() => handleDelete(d._id)}
+                                className="flex items-center justify-center gap-1.5 text-xs font-bold uppercase px-3 py-2 rounded-lg transition-all shadow-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-600 hover:text-white dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-600 dark:hover:text-white transition-colors"
+                              >
+                                <Trash2 size={15} strokeWidth={2.5} /> Delete
+                              </button>
+                            )
+                          )}
                         </div>
                       </td>
                     )}
